@@ -66,7 +66,6 @@ import static org.jboss.forge.validation.api.ConstraintLocation.METHOD;
 @RequiresFacet({ValidationFacet.class, JavaSourceFacet.class})
 public class PropertyConstraintPlugin implements Plugin
 {
-
     private final JavaSourceFacet javaSourceFacet;
     private final Shell shell;
 

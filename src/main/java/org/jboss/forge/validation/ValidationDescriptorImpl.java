@@ -35,7 +35,6 @@ import org.jboss.shrinkwrap.descriptor.spi.Node;
  */
 public class ValidationDescriptorImpl extends NodeProviderImplBase implements ValidationDescriptor
 {
-
     private final Node model;
 
     public ValidationDescriptorImpl(String descriptorName)

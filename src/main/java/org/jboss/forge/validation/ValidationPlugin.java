@@ -53,7 +53,6 @@ import org.jboss.shrinkwrap.descriptor.api.Descriptors;
 @RequiresProject
 public class ValidationPlugin implements Plugin
 {
-
     private final Project project;
     private final DependencyFacet dependencyFacet;
     private final Event<InstallFacets> request;

@@ -37,7 +37,6 @@ import static org.jboss.forge.project.dependencies.DependencyBuilder.create;
  */
 public class HibernateValidatorProvider implements ValidationProvider
 {
-
     private final ValidationDescriptor defaultDescriptor;
     private final Set<Dependency> dependencies;
 

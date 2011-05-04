@@ -45,7 +45,6 @@ import static org.jboss.forge.project.dependencies.ScopeType.PROVIDED;
 @RequiresFacet({ResourceFacet.class, DependencyFacet.class})
 public class ValidationFacetImpl extends BaseFacet implements ValidationFacet
 {
-
     private final Dependency beanValidationAPI;
 
     public ValidationFacetImpl()
