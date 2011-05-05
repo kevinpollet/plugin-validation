@@ -85,7 +85,7 @@ public class PropertyConstraintPlugin implements Plugin
         addConstraintMessageTo(constraintAnnotation, message);
 
         javaSourceFacet.saveJavaSource(javaClass);
-        shell.println("Added Null constraint on property named '" + property + "'");
+        outputConstraintAdded(property, Null.class);
     }
 
     @Command(value = "NotNull")
@@ -99,7 +99,7 @@ public class PropertyConstraintPlugin implements Plugin
         addConstraintMessageTo(constraintAnnotation, message);
 
         javaSourceFacet.saveJavaSource(javaClass);
-        shell.println("Added NotNull constraint on property named '" + property + "'");
+        outputConstraintAdded(property, NotNull.class);
     }
 
     @Command(value = "AssertTrue")
@@ -108,12 +108,12 @@ public class PropertyConstraintPlugin implements Plugin
     {
         final JavaClass javaClass = getJavaClassFromResource(shell.getCurrentResource());
 
-        // add constraints to property
+        // add constraint to property
         final Annotation<JavaClass> constraintAnnotation = addAnnotationTo(javaClass, property, AssertTrue.class);
         addConstraintMessageTo(constraintAnnotation, message);
 
         javaSourceFacet.saveJavaSource(javaClass);
-        shell.println("Added AssertTrue constraint on property named '" + property + "'");
+        outputConstraintAdded(property, AssertTrue.class);
     }
 
     @Command(value = "AssertFalse")
@@ -122,12 +122,12 @@ public class PropertyConstraintPlugin implements Plugin
     {
         final JavaClass javaClass = getJavaClassFromResource(shell.getCurrentResource());
 
-        // add constraints to property
+        // add constraint to property
         final Annotation<JavaClass> constraintAnnotation = addAnnotationTo(javaClass, property, AssertFalse.class);
         addConstraintMessageTo(constraintAnnotation, message);
 
         javaSourceFacet.saveJavaSource(javaClass);
-        shell.println("Added AssertFalse constraint on property named '" + property + "'");
+        outputConstraintAdded(property, AssertFalse.class);
     }
 
     @Command(value = "Min")
@@ -137,13 +137,13 @@ public class PropertyConstraintPlugin implements Plugin
     {
         final JavaClass javaClass = getJavaClassFromResource(shell.getCurrentResource());
 
-        // add constraints to property
+        // add constraint to property
         final Annotation<JavaClass> constraintAnnotation = addAnnotationTo(javaClass, property, Min.class);
         addConstraintMessageTo(constraintAnnotation, message);
         constraintAnnotation.setLiteralValue(String.valueOf(min));
 
         javaSourceFacet.saveJavaSource(javaClass);
-        shell.println("Added Min constraint on property named '" + property + "'");
+        outputConstraintAdded(property, Min.class);
     }
 
     @Command(value = "Max")
@@ -159,7 +159,7 @@ public class PropertyConstraintPlugin implements Plugin
         constraintAnnotation.setLiteralValue(String.valueOf(max));
 
         javaSourceFacet.saveJavaSource(javaClass);
-        shell.println("Added Min constraint on property '" + property + "'");
+        outputConstraintAdded(property, Max.class);
     }
 
     private Annotation<JavaClass> addAnnotationTo(JavaClass javaClass, String property, Class<? extends java.lang.annotation.Annotation> annotationClass)
@@ -195,5 +195,10 @@ public class PropertyConstraintPlugin implements Plugin
         {
             constraintAnnotation.setStringValue("message", message);
         }
+    }
+
+    private void outputConstraintAdded(String property, Class<? extends java.lang.annotation.Annotation> constraintClass)
+    {
+        shell.println(constraintClass.getSimpleName() + " has been added on property '" + property + "'");
     }
 }
