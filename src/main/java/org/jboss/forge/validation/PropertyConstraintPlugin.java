@@ -47,16 +47,14 @@ import org.jboss.forge.shell.plugins.Option;
 import org.jboss.forge.shell.plugins.Plugin;
 import org.jboss.forge.shell.plugins.RequiresFacet;
 import org.jboss.forge.shell.plugins.RequiresResource;
-import org.jboss.forge.validation.api.ConstraintLocation;
 import org.jboss.forge.validation.api.ValidationFacet;
-
-import static org.jboss.forge.validation.api.ConstraintLocation.FIELD;
-import static org.jboss.forge.validation.api.ConstraintLocation.METHOD;
+import org.jboss.forge.validation.completer.PropertyCompleter;
 
 //TODO add groups support
 //TODO add class constraints
 //TODO add all bean validation built-in constraints
 //TODO constraint list
+//TODO constraint on method
 
 /**
  * @author Kevin Pollet
@@ -77,92 +75,86 @@ public class PropertyConstraintPlugin implements Plugin
     }
 
     @Command(value = "Null")
-    public void addNullConstraint(@Option(name = "onproperty", required = true) String property,
-                                  @Option(name = "message") String message,
-                                  @Option(name = "on", defaultValue = "FIELD", required = true) ConstraintLocation location) throws FileNotFoundException
+    public void addNullConstraint(@Option(name = "on", completer = PropertyCompleter.class, required = true) String property,
+                                  @Option(name = "message") String message) throws FileNotFoundException
     {
         final JavaClass javaClass = getJavaClassFromResource(shell.getCurrentResource());
 
         // add constraint to property
-        final Annotation<JavaClass> constraintAnnotation = addAnnotationTo(javaClass, property, location, Null.class);
+        final Annotation<JavaClass> constraintAnnotation = addAnnotationTo(javaClass, property, Null.class);
         addConstraintMessageTo(constraintAnnotation, message);
 
         javaSourceFacet.saveJavaSource(javaClass);
-        shell.println("Added Null constraint on property '" + property + "'");
+        shell.println("Added Null constraint on property named '" + property + "'");
     }
 
     @Command(value = "NotNull")
-    public void addNotNullConstraint(@Option(name = "onproperty", required = true) String property,
-                                     @Option(name = "message") String message,
-                                     @Option(name = "on", defaultValue = "FIELD", required = true) ConstraintLocation location) throws FileNotFoundException
+    public void addNotNullConstraint(@Option(name = "on", completer = PropertyCompleter.class, required = true) String property,
+                                     @Option(name = "message") String message) throws FileNotFoundException
     {
         final JavaClass javaClass = getJavaClassFromResource(shell.getCurrentResource());
 
         // add constraint to property
-        final Annotation<JavaClass> constraintAnnotation = addAnnotationTo(javaClass, property, location, NotNull.class);
+        final Annotation<JavaClass> constraintAnnotation = addAnnotationTo(javaClass, property, NotNull.class);
         addConstraintMessageTo(constraintAnnotation, message);
 
         javaSourceFacet.saveJavaSource(javaClass);
-        shell.println("Added NotNull constraint on property '" + property + "'");
+        shell.println("Added NotNull constraint on property named '" + property + "'");
     }
 
     @Command(value = "AssertTrue")
-    public void addAssertTrueConstraint(@Option(name = "onproperty", required = true) String property,
-                                        @Option(name = "message") String message,
-                                        @Option(name = "on", defaultValue = "FIELD", required = true) ConstraintLocation location) throws FileNotFoundException
+    public void addAssertTrueConstraint(@Option(name = "on", completer = PropertyCompleter.class, required = true) String property,
+                                        @Option(name = "message") String message) throws FileNotFoundException
     {
         final JavaClass javaClass = getJavaClassFromResource(shell.getCurrentResource());
 
         // add constraints to property
-        final Annotation<JavaClass> constraintAnnotation = addAnnotationTo(javaClass, property, location, AssertTrue.class);
+        final Annotation<JavaClass> constraintAnnotation = addAnnotationTo(javaClass, property, AssertTrue.class);
         addConstraintMessageTo(constraintAnnotation, message);
 
         javaSourceFacet.saveJavaSource(javaClass);
-        shell.println("Added AssertTrue constraint on property '" + property + "'");
+        shell.println("Added AssertTrue constraint on property named '" + property + "'");
     }
 
     @Command(value = "AssertFalse")
-    public void addAssertFalseConstraint(@Option(name = "onproperty", required = true) String property,
-                                         @Option(name = "message") String message,
-                                         @Option(name = "on", defaultValue = "FIELD", required = true) ConstraintLocation location) throws FileNotFoundException
+    public void addAssertFalseConstraint(@Option(name = "on", completer = PropertyCompleter.class, required = true) String property,
+                                         @Option(name = "message") String message) throws FileNotFoundException
     {
         final JavaClass javaClass = getJavaClassFromResource(shell.getCurrentResource());
 
         // add constraints to property
-        final Annotation<JavaClass> constraintAnnotation = addAnnotationTo(javaClass, property, location, AssertFalse.class);
+        final Annotation<JavaClass> constraintAnnotation = addAnnotationTo(javaClass, property, AssertFalse.class);
         addConstraintMessageTo(constraintAnnotation, message);
 
         javaSourceFacet.saveJavaSource(javaClass);
-        shell.println("Added AssertFalse constraint on property '" + property + "'");
+        shell.println("Added AssertFalse constraint on property named '" + property + "'");
     }
 
     @Command(value = "Min")
-    public void addMinConstraint(@Option(name = "onproperty", required = true) String property,
+    public void addMinConstraint(@Option(name = "on", completer = PropertyCompleter.class, required = true) String property,
                                  @Option(name = "minValue", required = true) long min,
-                                 @Option(name = "message") String message,
-                                 @Option(name = "on", defaultValue = "FIELD", required = true) ConstraintLocation location) throws FileNotFoundException
+                                 @Option(name = "message") String message) throws FileNotFoundException
     {
         final JavaClass javaClass = getJavaClassFromResource(shell.getCurrentResource());
 
         // add constraints to property
-        final Annotation<JavaClass> constraintAnnotation = addAnnotationTo(javaClass, property, location, Min.class);
+        final Annotation<JavaClass> constraintAnnotation = addAnnotationTo(javaClass, property, Min.class);
         addConstraintMessageTo(constraintAnnotation, message);
         constraintAnnotation.setLiteralValue(String.valueOf(min));
 
         javaSourceFacet.saveJavaSource(javaClass);
-        shell.println("Added Min constraint on property '" + property + "'");
+        shell.println("Added Min constraint on property named '" + property + "'");
     }
 
     @Command(value = "Max")
-    public void addMaxConstraint(@Option(name = "onproperty", required = true) String property,
+    public void addMaxConstraint(@Option(name = "on", completer = PropertyCompleter.class, required = true) String property,
                                  @Option(name = "maxValue", required = true) long max,
-                                 @Option(name = "message") String message,
-                                 @Option(name = "on", defaultValue = "FIELD", required = true) ConstraintLocation location) throws FileNotFoundException
+                                 @Option(name = "message") String message) throws FileNotFoundException
     {
         final JavaClass javaClass = getJavaClassFromResource(shell.getCurrentResource());
 
         // add constraints to property
-        final Annotation<JavaClass> constraintAnnotation = addAnnotationTo(javaClass, property, location, Max.class);
+        final Annotation<JavaClass> constraintAnnotation = addAnnotationTo(javaClass, property, Max.class);
         addConstraintMessageTo(constraintAnnotation, message);
         constraintAnnotation.setLiteralValue(String.valueOf(max));
 
@@ -170,27 +162,15 @@ public class PropertyConstraintPlugin implements Plugin
         shell.println("Added Min constraint on property '" + property + "'");
     }
 
-    private Annotation<JavaClass> addAnnotationTo(JavaClass javaClass, String property, ConstraintLocation location, Class<? extends java.lang.annotation.Annotation> annotationClass)
+    private Annotation<JavaClass> addAnnotationTo(JavaClass javaClass, String property, Class<? extends java.lang.annotation.Annotation> annotationClass)
     {
-        if (location == FIELD)
+        final Field<JavaClass> field = javaClass.getField(property);
+        if (field == null)
         {
-            final Field<JavaClass> field = javaClass.getField(property);
-            if (field == null)
-            {
-                throw new IllegalStateException("The current class has no property named '" + property + "'");
-            }
-            return field.addAnnotation(annotationClass);
+            throw new IllegalStateException("The current class has no property named '" + property + "'");
         }
-        else if (location == METHOD)
-        {
-            Method<JavaClass> method = getPropertyAccessor(javaClass, property);
-            if (method == null)
-            {
-                throw new IllegalStateException("The current class has no accessor method for property '" + property + "'");
-            }
-            return method.addAnnotation(annotationClass);
-        }
-        throw new RuntimeException("Only field or method can be annotated with constraint");
+
+        return field.addAnnotation(annotationClass);
     }
 
     private JavaClass getJavaClassFromResource(Resource<?> resource) throws FileNotFoundException
