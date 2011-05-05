@@ -35,10 +35,11 @@ import org.jboss.forge.parser.java.Annotation;
 import org.jboss.forge.parser.java.Field;
 import org.jboss.forge.parser.java.JavaClass;
 import org.jboss.forge.parser.java.JavaSource;
-import org.jboss.forge.parser.java.Method;
 import org.jboss.forge.project.Project;
 import org.jboss.forge.project.facets.JavaSourceFacet;
 import org.jboss.forge.resources.Resource;
+import org.jboss.forge.resources.java.JavaFieldResource;
+import org.jboss.forge.resources.java.JavaMemberResource;
 import org.jboss.forge.resources.java.JavaResource;
 import org.jboss.forge.shell.Shell;
 import org.jboss.forge.shell.plugins.Alias;
@@ -49,6 +50,7 @@ import org.jboss.forge.shell.plugins.RequiresFacet;
 import org.jboss.forge.shell.plugins.RequiresResource;
 import org.jboss.forge.validation.api.ValidationFacet;
 import org.jboss.forge.validation.completer.PropertyCompleter;
+import org.jboss.forge.validation.util.ResourceHelper;
 
 //TODO add groups support
 //TODO add class constraints
@@ -59,7 +61,7 @@ import org.jboss.forge.validation.completer.PropertyCompleter;
 /**
  * @author Kevin Pollet
  */
-@Alias("add-constraint")
+@Alias("new-constraint")
 @RequiresResource(JavaResource.class)
 @RequiresFacet({ValidationFacet.class, JavaSourceFacet.class})
 public class PropertyConstraintPlugin implements Plugin
@@ -78,13 +80,10 @@ public class PropertyConstraintPlugin implements Plugin
     public void addNullConstraint(@Option(name = "on", completer = PropertyCompleter.class, required = true) String property,
                                   @Option(name = "message") String message) throws FileNotFoundException
     {
-        final JavaClass javaClass = getJavaClassFromResource(shell.getCurrentResource());
-
-        // add constraint to property
-        final Annotation<JavaClass> constraintAnnotation = addAnnotationTo(javaClass, property, Null.class);
+        final Annotation<JavaClass> constraintAnnotation = addConstraintAnnotation(property, Null.class);
         addConstraintMessageTo(constraintAnnotation, message);
+        javaSourceFacet.saveJavaSource(constraintAnnotation.getOrigin());
 
-        javaSourceFacet.saveJavaSource(javaClass);
         outputConstraintAdded(property, Null.class);
     }
 
@@ -92,13 +91,10 @@ public class PropertyConstraintPlugin implements Plugin
     public void addNotNullConstraint(@Option(name = "on", completer = PropertyCompleter.class, required = true) String property,
                                      @Option(name = "message") String message) throws FileNotFoundException
     {
-        final JavaClass javaClass = getJavaClassFromResource(shell.getCurrentResource());
-
-        // add constraint to property
-        final Annotation<JavaClass> constraintAnnotation = addAnnotationTo(javaClass, property, NotNull.class);
+        final Annotation<JavaClass> constraintAnnotation = addConstraintAnnotation(property, NotNull.class);
         addConstraintMessageTo(constraintAnnotation, message);
+        javaSourceFacet.saveJavaSource(constraintAnnotation.getOrigin());
 
-        javaSourceFacet.saveJavaSource(javaClass);
         outputConstraintAdded(property, NotNull.class);
     }
 
@@ -106,13 +102,10 @@ public class PropertyConstraintPlugin implements Plugin
     public void addAssertTrueConstraint(@Option(name = "on", completer = PropertyCompleter.class, required = true) String property,
                                         @Option(name = "message") String message) throws FileNotFoundException
     {
-        final JavaClass javaClass = getJavaClassFromResource(shell.getCurrentResource());
-
-        // add constraint to property
-        final Annotation<JavaClass> constraintAnnotation = addAnnotationTo(javaClass, property, AssertTrue.class);
+        final Annotation<JavaClass> constraintAnnotation = addConstraintAnnotation(property, AssertTrue.class);
         addConstraintMessageTo(constraintAnnotation, message);
+        javaSourceFacet.saveJavaSource(constraintAnnotation.getOrigin());
 
-        javaSourceFacet.saveJavaSource(javaClass);
         outputConstraintAdded(property, AssertTrue.class);
     }
 
@@ -120,13 +113,10 @@ public class PropertyConstraintPlugin implements Plugin
     public void addAssertFalseConstraint(@Option(name = "on", completer = PropertyCompleter.class, required = true) String property,
                                          @Option(name = "message") String message) throws FileNotFoundException
     {
-        final JavaClass javaClass = getJavaClassFromResource(shell.getCurrentResource());
-
-        // add constraint to property
-        final Annotation<JavaClass> constraintAnnotation = addAnnotationTo(javaClass, property, AssertFalse.class);
+        final Annotation<JavaClass> constraintAnnotation = addConstraintAnnotation(property, AssertFalse.class);
         addConstraintMessageTo(constraintAnnotation, message);
+        javaSourceFacet.saveJavaSource(constraintAnnotation.getOrigin());
 
-        javaSourceFacet.saveJavaSource(javaClass);
         outputConstraintAdded(property, AssertFalse.class);
     }
 
@@ -135,14 +125,11 @@ public class PropertyConstraintPlugin implements Plugin
                                  @Option(name = "minValue", required = true) long min,
                                  @Option(name = "message") String message) throws FileNotFoundException
     {
-        final JavaClass javaClass = getJavaClassFromResource(shell.getCurrentResource());
-
-        // add constraint to property
-        final Annotation<JavaClass> constraintAnnotation = addAnnotationTo(javaClass, property, Min.class);
+        final Annotation<JavaClass> constraintAnnotation = addConstraintAnnotation(property, Min.class);
         addConstraintMessageTo(constraintAnnotation, message);
         constraintAnnotation.setLiteralValue(String.valueOf(min));
+        javaSourceFacet.saveJavaSource(constraintAnnotation.getOrigin());
 
-        javaSourceFacet.saveJavaSource(javaClass);
         outputConstraintAdded(property, Min.class);
     }
 
@@ -151,20 +138,18 @@ public class PropertyConstraintPlugin implements Plugin
                                  @Option(name = "maxValue", required = true) long max,
                                  @Option(name = "message") String message) throws FileNotFoundException
     {
-        final JavaClass javaClass = getJavaClassFromResource(shell.getCurrentResource());
-
-        // add constraints to property
-        final Annotation<JavaClass> constraintAnnotation = addAnnotationTo(javaClass, property, Max.class);
+        final Annotation<JavaClass> constraintAnnotation = addConstraintAnnotation(property, Max.class);
         addConstraintMessageTo(constraintAnnotation, message);
         constraintAnnotation.setLiteralValue(String.valueOf(max));
+        javaSourceFacet.saveJavaSource(constraintAnnotation.getOrigin());
 
-        javaSourceFacet.saveJavaSource(javaClass);
         outputConstraintAdded(property, Max.class);
     }
 
-    private Annotation<JavaClass> addAnnotationTo(JavaClass javaClass, String property, Class<? extends java.lang.annotation.Annotation> annotationClass)
+    private Annotation<JavaClass> addConstraintAnnotation(String property, Class<? extends java.lang.annotation.Annotation> annotationClass) throws FileNotFoundException
     {
-        final Field<JavaClass> field = javaClass.getField(property);
+        final JavaClass clazz = ResourceHelper.getJavaClassFromResource(shell.getCurrentResource());
+        final Field<JavaClass> field = clazz.getField(property);
         if (field == null)
         {
             throw new IllegalStateException("The current class has no property named '" + property + "'");
@@ -173,27 +158,11 @@ public class PropertyConstraintPlugin implements Plugin
         return field.addAnnotation(annotationClass);
     }
 
-    private JavaClass getJavaClassFromResource(Resource<?> resource) throws FileNotFoundException
-    {
-        if (resource instanceof JavaResource)
-        {
-            final JavaResource javaResource = (JavaResource) resource;
-            final JavaSource<?> javaSource = javaResource.getJavaSource();
-            if (!(javaSource.isClass() || javaSource.isInterface()))
-            {
-                throw new IllegalStateException("Constraint can only be added on interface method or class property");
-            }
-
-            return (JavaClass) javaResource.getJavaSource();
-        }
-        throw new RuntimeException("The current resource is not a Java Resource");
-    }
-
-    private void addConstraintMessageTo(Annotation<JavaClass> constraintAnnotation, String message)
+    private void addConstraintMessageTo(Annotation<JavaClass> annotation, String message)
     {
         if (message != null)
         {
-            constraintAnnotation.setStringValue("message", message);
+            annotation.setStringValue("message", message);
         }
     }
 
