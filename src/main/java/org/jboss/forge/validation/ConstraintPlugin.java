@@ -177,13 +177,9 @@ public class ConstraintPlugin implements Plugin
 
     private void outputConstraintAdded(String property, Class<? extends java.lang.annotation.Annotation> constraintClass)
     {
-        if (property != null)
-        {
-            shell.println(constraintClass.getSimpleName() + " has been added on property '" + property + "'");
-        }
-        else
-        {
-            shell.println(constraintClass.getSimpleName() + " has been added on '" + shell.getCurrentResource().getName() + "'");
-        }
+        final StringBuilder builder = new StringBuilder();
+        builder.append(constraintClass.getSimpleName() + " has been added on ");
+        builder.append(property != null ? property : shell.getCurrentResource().getName());
+        shell.println(builder.toString());
     }
 }
