@@ -45,13 +45,13 @@ public class ResourceHelper
     {
         if (resource instanceof JavaResource)
         {
-            final JavaMemberResource javaResource = (JavaMemberResource) resource;
-            return javaResource.getUnderlyingResourceObject().addAnnotation(annotationClass);
+            final JavaClass clazz = getJavaClassFromResource(resource);
+            return clazz.addAnnotation(annotationClass);
         }
         else if (resource instanceof JavaMemberResource)
         {
-            final JavaMemberResource memberResource = JavaMemberResource.class.cast(resource);
-            return memberResource.getUnderlyingResourceObject().addAnnotation(annotationClass);
+            final JavaMemberResource javaMemberResource = (JavaMemberResource) resource;
+            return javaMemberResource.getUnderlyingResourceObject().addAnnotation(annotationClass);
         }
         return null;
     }

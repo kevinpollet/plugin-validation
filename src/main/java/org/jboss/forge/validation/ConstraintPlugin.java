@@ -40,6 +40,7 @@ import org.jboss.forge.project.facets.JavaSourceFacet;
 import org.jboss.forge.resources.Resource;
 import org.jboss.forge.resources.java.JavaFieldResource;
 import org.jboss.forge.resources.java.JavaMemberResource;
+import org.jboss.forge.resources.java.JavaMethodResource;
 import org.jboss.forge.resources.java.JavaResource;
 import org.jboss.forge.shell.Shell;
 import org.jboss.forge.shell.plugins.Alias;
@@ -62,22 +63,22 @@ import org.jboss.forge.validation.util.ResourceHelper;
  * @author Kevin Pollet
  */
 @Alias("new-constraint")
-@RequiresResource(JavaResource.class)
+@RequiresResource({JavaResource.class, JavaFieldResource.class, JavaMethodResource.class})
 @RequiresFacet({ValidationFacet.class, JavaSourceFacet.class})
-public class PropertyConstraintPlugin implements Plugin
+public class ConstraintPlugin implements Plugin
 {
     private final JavaSourceFacet javaSourceFacet;
     private final Shell shell;
 
     @Inject
-    public PropertyConstraintPlugin(Project project, Shell shell)
+    public ConstraintPlugin(Project project, Shell shell)
     {
         this.javaSourceFacet = project.getFacet(JavaSourceFacet.class);
         this.shell = shell;
     }
 
     @Command(value = "Null")
-    public void addNullConstraint(@Option(name = "on", completer = PropertyCompleter.class, required = true) String property,
+    public void addNullConstraint(@Option(name = "on", completer = PropertyCompleter.class) String property,
                                   @Option(name = "message") String message) throws FileNotFoundException
     {
         final Annotation<JavaClass> constraintAnnotation = addConstraintAnnotation(property, Null.class);
@@ -88,7 +89,7 @@ public class PropertyConstraintPlugin implements Plugin
     }
 
     @Command(value = "NotNull")
-    public void addNotNullConstraint(@Option(name = "on", completer = PropertyCompleter.class, required = true) String property,
+    public void addNotNullConstraint(@Option(name = "on", completer = PropertyCompleter.class) String property,
                                      @Option(name = "message") String message) throws FileNotFoundException
     {
         final Annotation<JavaClass> constraintAnnotation = addConstraintAnnotation(property, NotNull.class);
@@ -99,7 +100,7 @@ public class PropertyConstraintPlugin implements Plugin
     }
 
     @Command(value = "AssertTrue")
-    public void addAssertTrueConstraint(@Option(name = "on", completer = PropertyCompleter.class, required = true) String property,
+    public void addAssertTrueConstraint(@Option(name = "on", completer = PropertyCompleter.class) String property,
                                         @Option(name = "message") String message) throws FileNotFoundException
     {
         final Annotation<JavaClass> constraintAnnotation = addConstraintAnnotation(property, AssertTrue.class);
@@ -110,7 +111,7 @@ public class PropertyConstraintPlugin implements Plugin
     }
 
     @Command(value = "AssertFalse")
-    public void addAssertFalseConstraint(@Option(name = "on", completer = PropertyCompleter.class, required = true) String property,
+    public void addAssertFalseConstraint(@Option(name = "on", completer = PropertyCompleter.class) String property,
                                          @Option(name = "message") String message) throws FileNotFoundException
     {
         final Annotation<JavaClass> constraintAnnotation = addConstraintAnnotation(property, AssertFalse.class);
@@ -121,7 +122,7 @@ public class PropertyConstraintPlugin implements Plugin
     }
 
     @Command(value = "Min")
-    public void addMinConstraint(@Option(name = "on", completer = PropertyCompleter.class, required = true) String property,
+    public void addMinConstraint(@Option(name = "on", completer = PropertyCompleter.class) String property,
                                  @Option(name = "minValue", required = true) long min,
                                  @Option(name = "message") String message) throws FileNotFoundException
     {
@@ -134,7 +135,7 @@ public class PropertyConstraintPlugin implements Plugin
     }
 
     @Command(value = "Max")
-    public void addMaxConstraint(@Option(name = "on", completer = PropertyCompleter.class, required = true) String property,
+    public void addMaxConstraint(@Option(name = "on", completer = PropertyCompleter.class) String property,
                                  @Option(name = "maxValue", required = true) long max,
                                  @Option(name = "message") String message) throws FileNotFoundException
     {
@@ -148,14 +149,22 @@ public class PropertyConstraintPlugin implements Plugin
 
     private Annotation<JavaClass> addConstraintAnnotation(String property, Class<? extends java.lang.annotation.Annotation> annotationClass) throws FileNotFoundException
     {
-        final JavaClass clazz = ResourceHelper.getJavaClassFromResource(shell.getCurrentResource());
-        final Field<JavaClass> field = clazz.getField(property);
-        if (field == null)
+        if (property != null)
         {
-            throw new IllegalStateException("The current class has no property named '" + property + "'");
-        }
+            final JavaClass clazz = ResourceHelper.getJavaClassFromResource(shell.getCurrentResource());
+            final Field<JavaClass> field = clazz.getField(property);
+            if (field == null)
+            {
+                throw new IllegalStateException("The current class has no property named '" + property + "'");
+            }
 
-        return field.addAnnotation(annotationClass);
+            return field.addAnnotation(annotationClass);
+        }
+        else // add constraint on the current shell resource
+        {
+            final Resource<?> currentResource = shell.getCurrentResource();
+            return ResourceHelper.addAnnotationTo(currentResource, annotationClass);
+        }
     }
 
     private void addConstraintMessageTo(Annotation<JavaClass> annotation, String message)
@@ -168,6 +177,13 @@ public class PropertyConstraintPlugin implements Plugin
 
     private void outputConstraintAdded(String property, Class<? extends java.lang.annotation.Annotation> constraintClass)
     {
-        shell.println(constraintClass.getSimpleName() + " has been added on property '" + property + "'");
+        if (property != null)
+        {
+            shell.println(constraintClass.getSimpleName() + " has been added on property '" + property + "'");
+        }
+        else
+        {
+            shell.println(constraintClass.getSimpleName() + " has been added on '" + shell.getCurrentResource().getName() + "'");
+        }
     }
 }
