@@ -189,18 +189,6 @@ public class PropertyConstraintPlugin implements Plugin
         throw new RuntimeException("The current resource is not a Java Resource");
     }
 
-    private Method<JavaClass> getPropertyAccessor(JavaClass clazz, String property)
-    {
-        final StringBuilder methodName = new StringBuilder();
-        methodName.append("get");
-        methodName.append(Character.toUpperCase(property.charAt(0)));
-        if (property.length() > 1)
-        {
-            methodName.append(property.substring(1, property.length()));
-        }
-        return clazz.getMethod(methodName.toString());
-    }
-
     private void addConstraintMessageTo(Annotation<JavaClass> constraintAnnotation, String message)
     {
         if (message != null)
