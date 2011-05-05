@@ -33,7 +33,7 @@ import org.jboss.forge.resources.java.JavaResource;
 /**
  * @author Kevin Pollet
  */
-public class ResourceHelper
+public final class ResourceHelper
 {
     //disable instantiation
     private ResourceHelper()
@@ -53,22 +53,22 @@ public class ResourceHelper
             final JavaMemberResource javaMemberResource = (JavaMemberResource) resource;
             return javaMemberResource.getUnderlyingResourceObject().addAnnotation(annotationClass);
         }
-        return null;
+        throw new IllegalArgumentException("An annotation can only be added on a class, field or method");
     }
 
     public static JavaClass getJavaClassFromResource(Resource<?> resource) throws FileNotFoundException
     {
-        if (resource instanceof JavaResource)
+        if (!(resource instanceof JavaResource))
         {
-            final JavaResource javaResource = (JavaResource) resource;
-            final JavaSource<?> javaSource = javaResource.getJavaSource();
-            if (!(javaSource.isClass() || javaSource.isInterface()))
-            {
-                throw new IllegalStateException("Constraint can only be added on interface method or class property");
-            }
-
-            return (JavaClass) javaResource.getJavaSource();
+            throw new IllegalArgumentException("The given resource is not a java resource");
         }
-        throw new RuntimeException("The current resource is not a Java Resource");
+
+        final JavaResource javaResource = (JavaResource) resource;
+        final JavaSource<?> javaSource = javaResource.getJavaSource();
+        if (!(javaSource.isClass() || javaSource.isInterface()))
+        {
+            throw new IllegalArgumentException("The given resource is not a class or an interface");
+        }
+        return (JavaClass) javaResource.getJavaSource();
     }
 }
