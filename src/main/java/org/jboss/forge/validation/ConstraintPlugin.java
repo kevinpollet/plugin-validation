@@ -39,7 +39,6 @@ import javax.validation.constraints.Pattern;
 import javax.validation.constraints.Size;
 
 import org.jboss.forge.parser.java.Annotation;
-import org.jboss.forge.parser.java.Field;
 import org.jboss.forge.parser.java.JavaClass;
 import org.jboss.forge.project.Project;
 import org.jboss.forge.project.facets.JavaSourceFacet;
@@ -56,7 +55,9 @@ import org.jboss.forge.shell.plugins.RequiresFacet;
 import org.jboss.forge.shell.plugins.RequiresResource;
 import org.jboss.forge.validation.api.ValidationFacet;
 import org.jboss.forge.validation.completer.PropertyCompleter;
-import org.jboss.forge.validation.util.ResourceHelper;
+
+import static org.jboss.forge.validation.util.ResourceHelper.addAnnotationTo;
+import static org.jboss.forge.validation.util.ResourceHelper.getJavaClassFromResource;
 
 //TODO add groups support
 //TODO constraint list
@@ -275,22 +276,17 @@ public class ConstraintPlugin implements Plugin
 
     private Annotation<JavaClass> addConstraintAnnotation(String property, Class<? extends java.lang.annotation.Annotation> annotationClass) throws FileNotFoundException
     {
+        final Resource<?> current = shell.getCurrentResource();
         if (property != null)
         {
-            final JavaClass clazz = ResourceHelper.getJavaClassFromResource(shell.getCurrentResource());
-            final Field<JavaClass> field = clazz.getField(property);
-            if (field == null)
+            final JavaClass clazz = getJavaClassFromResource(current);
+            if (clazz.hasField(property))
             {
-                throw new IllegalStateException("The current class has no property named '" + property + "'");
+                return clazz.getField(property).addAnnotation(annotationClass);
             }
-
-            return field.addAnnotation(annotationClass);
+            throw new IllegalStateException("The current class has no property named '" + property + "'");
         }
-        else // add constraint on the current shell resource
-        {
-            final Resource<?> currentResource = shell.getCurrentResource();
-            return ResourceHelper.addAnnotationTo(currentResource, annotationClass);
-        }
+        return addAnnotationTo(current, annotationClass);
     }
 
     private void addConstraintMessageTo(Annotation<JavaClass> annotation, String message)
