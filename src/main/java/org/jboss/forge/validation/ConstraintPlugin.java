@@ -59,10 +59,6 @@ import org.jboss.forge.validation.completer.PropertyCompleter;
 import static org.jboss.forge.validation.util.ResourceHelper.addAnnotationTo;
 import static org.jboss.forge.validation.util.ResourceHelper.getJavaClassFromResource;
 
-//TODO add groups support
-//TODO constraint list
-//TODO constraint on method
-
 /**
  * @author Kevin Pollet
  */
