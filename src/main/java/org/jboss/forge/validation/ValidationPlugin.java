@@ -38,10 +38,10 @@ import org.jboss.forge.shell.plugins.PipeOut;
 import org.jboss.forge.shell.plugins.Plugin;
 import org.jboss.forge.shell.plugins.RequiresFacet;
 import org.jboss.forge.shell.plugins.RequiresProject;
-import org.jboss.forge.validation.api.BVProvider;
+import org.jboss.forge.validation.provider.BVProvider;
 import org.jboss.forge.validation.api.ValidationDescriptor;
 import org.jboss.forge.validation.api.ValidationFacet;
-import org.jboss.forge.validation.api.ValidationProvider;
+import org.jboss.forge.validation.provider.ValidationProvider;
 import org.jboss.shrinkwrap.descriptor.api.Descriptors;
 
 /**

@@ -26,7 +26,6 @@ import java.util.Set;
 
 import org.jboss.forge.project.dependencies.Dependency;
 import org.jboss.forge.validation.api.ValidationDescriptor;
-import org.jboss.forge.validation.api.ValidationProvider;
 import org.jboss.shrinkwrap.descriptor.api.Descriptors;
 
 import static java.util.Collections.unmodifiableSet;

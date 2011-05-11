@@ -19,18 +19,36 @@
  * Software Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA
  * 02110-1301 USA, or see the FSF site: http://www.fsf.org.
  */
-package org.jboss.forge.validation.api;
+package org.jboss.forge.validation.provider;
 
-import java.util.Set;
+import javax.enterprise.inject.spi.BeanManager;
 
-import org.jboss.forge.project.dependencies.Dependency;
+import static org.jboss.forge.shell.util.BeanManagerUtils.getContextualInstance;
 
 /**
  * @author Kevin Pollet
  */
-public interface ValidationProvider
+public enum BVProvider
 {
-    ValidationDescriptor getDefaultDescriptor();
+    HIBERNATE_VALIDATOR(HibernateValidatorProvider.class),
 
-    Set<Dependency> getDependencies();
+    APACHE_BEAN_VALIDATION(ApacheBeanValidationProvider.class);
+
+
+    private final Class<? extends ValidationProvider> validationProviderClass;
+
+    BVProvider(Class<? extends ValidationProvider> validationProviderClass)
+    {
+        this.validationProviderClass = validationProviderClass;
+    }
+
+    public ValidationProvider getValidationProvider(BeanManager manager)
+    {
+        return getContextualInstance(manager, validationProviderClass);
+    }
+
+    public Class<? extends ValidationProvider> getValidationProviderClass()
+    {
+        return validationProviderClass;
+    }
 }
