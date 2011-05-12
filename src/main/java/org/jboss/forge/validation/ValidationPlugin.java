@@ -29,6 +29,7 @@ import javax.inject.Inject;
 
 import org.jboss.forge.project.Project;
 import org.jboss.forge.project.dependencies.Dependency;
+import org.jboss.forge.project.dependencies.DependencyBuilder;
 import org.jboss.forge.project.facets.DependencyFacet;
 import org.jboss.forge.shell.events.InstallFacets;
 import org.jboss.forge.shell.plugins.Alias;
@@ -45,6 +46,8 @@ import org.jboss.forge.validation.provider.BVProvider;
 import org.jboss.forge.validation.provider.ValidationProvider;
 import org.jboss.shrinkwrap.descriptor.api.Descriptors;
 
+import static org.jboss.forge.project.dependencies.ScopeType.PROVIDED;
+
 /**
  * @author Kevin Pollet
  */
@@ -57,6 +60,8 @@ public class ValidationPlugin implements Plugin
     private final BeanManager beanManager;
     private final Event<InstallFacets> request;
     private final DependencyFacet dependencyFacet;
+    private final Dependency javaee6SpecAPI;
+    private final Dependency beanValidationAPI;
 
     @Inject
     public ValidationPlugin(Project project, Event<InstallFacets> request, BeanManager beanManager)
@@ -65,6 +70,18 @@ public class ValidationPlugin implements Plugin
         this.beanManager = beanManager;
         this.request = request;
         this.dependencyFacet = project.getFacet(DependencyFacet.class);
+
+        this.javaee6SpecAPI = DependencyBuilder.create()
+                .setGroupId("org.jboss.spec")
+                .setArtifactId("jboss-javaee-6.0")
+                .setVersion("1.0.0.Final")
+                .setScopeType(PROVIDED);
+
+        this.beanValidationAPI = DependencyBuilder.create()
+                .setGroupId("javax.validation")
+                .setArtifactId("validation-api")
+                .setVersion("1.0.0.GA")
+                .setScopeType(PROVIDED);
     }
 
     @DefaultCommand(help = "Shows the status of the validation setup")
@@ -91,6 +108,7 @@ public class ValidationPlugin implements Plugin
         final ValidationProvider validationProvider = provider.getValidationProvider(beanManager);
 
         installValidationFacet();
+        installValidationDependencies();
         installValidationProviderDependencies(validationProvider.getDependencies());
 
         // create validation descriptor if needed
@@ -104,7 +122,7 @@ public class ValidationPlugin implements Plugin
                     .constraintValidatorFactory(constraintValidatorFactory == null ? providerDescriptor.getConstraintValidatorFactory() : constraintValidatorFactory);
 
             project.getFacet(ValidationFacet.class).saveConfig(descriptor);
-            pipeOut.println("Validation descriptor has been created successfully.");
+            pipeOut.println("validation descriptor has been created successfully.");
         }
     }
 
@@ -113,6 +131,14 @@ public class ValidationPlugin implements Plugin
         if (!project.hasFacet(ValidationFacet.class))
         {
             request.fire(new InstallFacets(ValidationFacet.class));
+        }
+    }
+
+    private void installValidationDependencies()
+    {
+        if (!dependencyFacet.hasDependency(javaee6SpecAPI) && !dependencyFacet.hasDependency(beanValidationAPI))
+        {
+            dependencyFacet.addDependency(beanValidationAPI);
         }
     }
 

@@ -23,8 +23,6 @@ package org.jboss.forge.validation;
 
 import java.io.File;
 
-import org.jboss.forge.project.dependencies.Dependency;
-import org.jboss.forge.project.dependencies.DependencyBuilder;
 import org.jboss.forge.project.facets.BaseFacet;
 import org.jboss.forge.project.facets.DependencyFacet;
 import org.jboss.forge.project.facets.ResourceFacet;
@@ -36,8 +34,6 @@ import org.jboss.forge.validation.api.ValidationFacet;
 import org.jboss.shrinkwrap.descriptor.api.DescriptorImporter;
 import org.jboss.shrinkwrap.descriptor.api.Descriptors;
 
-import static org.jboss.forge.project.dependencies.ScopeType.PROVIDED;
-
 /**
  * @author Kevin Pollet
  */
@@ -45,17 +41,6 @@ import static org.jboss.forge.project.dependencies.ScopeType.PROVIDED;
 @RequiresFacet({ResourceFacet.class, DependencyFacet.class})
 public class ValidationFacetImpl extends BaseFacet implements ValidationFacet
 {
-    private final Dependency beanValidationAPI;
-
-    public ValidationFacetImpl()
-    {
-        this.beanValidationAPI = DependencyBuilder.create()
-                .setGroupId("javax.validation")
-                .setArtifactId("validation-api")
-                .setVersion("1.0.0.GA")
-                .setScopeType(PROVIDED);
-    }
-
     @Override
     public ValidationDescriptor getConfig()
     {
@@ -79,10 +64,7 @@ public class ValidationFacetImpl extends BaseFacet implements ValidationFacet
     public void saveConfig(ValidationDescriptor descriptor)
     {
         final FileResource<?> fileResource = getConfigFile();
-        if (!fileResource.exists())
-        {
-            fileResource.createNewFile();
-        }
+        fileResource.createNewFile();
         fileResource.setContents(descriptor.exportAsString());
     }
 
@@ -91,8 +73,8 @@ public class ValidationFacetImpl extends BaseFacet implements ValidationFacet
     {
         if (!isInstalled())
         {
-            final DependencyFacet dependencyFacet = project.getFacet(DependencyFacet.class);
-            dependencyFacet.addDependency(beanValidationAPI);
+            // creates an empty descriptor file. This file is used as a marker to know if the facet is installed.
+            saveConfig(Descriptors.create(ValidationDescriptor.class));
         }
         return true;
     }
@@ -100,7 +82,6 @@ public class ValidationFacetImpl extends BaseFacet implements ValidationFacet
     @Override
     public boolean isInstalled()
     {
-        DependencyFacet dependencyFacet = project.getFacet(DependencyFacet.class);
-        return dependencyFacet.hasDependency(beanValidationAPI);
+        return getConfigFile().exists();
     }
 }
