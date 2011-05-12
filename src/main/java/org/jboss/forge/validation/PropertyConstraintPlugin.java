@@ -304,7 +304,7 @@ public class PropertyConstraintPlugin implements Plugin
         }
         else if (field.hasAnnotation(annotationClass))
         {
-            throw new IllegalStateException("The propertynamed '" + property + "' is already annotated with " + annotationClass.getSimpleName());
+            throw new IllegalStateException("The property named '" + property + "' is already annotated with " + annotationClass.getSimpleName());
         }
 
         return field.addAnnotation(annotationClass);
