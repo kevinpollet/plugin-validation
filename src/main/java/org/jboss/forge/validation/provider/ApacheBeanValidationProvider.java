@@ -30,7 +30,6 @@ import org.jboss.forge.validation.api.ValidationDescriptor;
 import org.jboss.shrinkwrap.descriptor.api.Descriptors;
 
 import static java.util.Collections.unmodifiableSet;
-import static org.jboss.forge.project.dependencies.ScopeType.PROVIDED;
 
 /**
  * @author Kevin Pollet
@@ -53,8 +52,7 @@ public class ApacheBeanValidationProvider implements ValidationProvider
         final DependencyBuilder apacheBeanValidation = DependencyBuilder.create()
                 .setGroupId("org.apache.bval")
                 .setArtifactId("org.apache.bval.bundle")
-                .setVersion("0.3-incubating")
-                .setScopeType(PROVIDED);
+                .setVersion("[0.1-incubating,)");
 
         final Set<Dependency> tmpSet = new HashSet<Dependency>();
         tmpSet.add(apacheBeanValidation);

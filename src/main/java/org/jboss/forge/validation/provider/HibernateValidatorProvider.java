@@ -53,7 +53,7 @@ public class HibernateValidatorProvider implements ValidationProvider
         final DependencyBuilder hibernateValidator = DependencyBuilder.create()
                 .setGroupId("org.hibernate")
                 .setArtifactId("hibernate-validator")
-                .setVersion("4.2.0.Beta2")
+                .setVersion("[4.1.0.Final,)")
                 .setScopeType(PROVIDED);
 
         final Set<Dependency> tmpSet = new HashSet<Dependency>();

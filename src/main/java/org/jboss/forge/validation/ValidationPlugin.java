@@ -21,6 +21,7 @@
  */
 package org.jboss.forge.validation;
 
+import java.util.List;
 import java.util.Set;
 
 import javax.enterprise.event.Event;
@@ -31,6 +32,7 @@ import org.jboss.forge.project.Project;
 import org.jboss.forge.project.dependencies.Dependency;
 import org.jboss.forge.project.dependencies.DependencyBuilder;
 import org.jboss.forge.project.facets.DependencyFacet;
+import org.jboss.forge.shell.ShellPrompt;
 import org.jboss.forge.shell.events.InstallFacets;
 import org.jboss.forge.shell.plugins.Alias;
 import org.jboss.forge.shell.plugins.Command;
@@ -62,14 +64,16 @@ public class ValidationPlugin implements Plugin
     private final DependencyFacet dependencyFacet;
     private final Dependency javaee6SpecAPI;
     private final Dependency beanValidationAPI;
+    private final ShellPrompt shellPrompt;
 
     @Inject
-    public ValidationPlugin(Project project, Event<InstallFacets> request, BeanManager beanManager)
+    public ValidationPlugin(Project project, Event<InstallFacets> request, BeanManager beanManager, ShellPrompt shellPrompt)
     {
         this.project = project;
         this.beanManager = beanManager;
         this.request = request;
         this.dependencyFacet = project.getFacet(DependencyFacet.class);
+        this.shellPrompt = shellPrompt;
 
         this.javaee6SpecAPI = DependencyBuilder.create()
                 .setGroupId("org.jboss.spec")
@@ -146,9 +150,13 @@ public class ValidationPlugin implements Plugin
     {
         for (Dependency oneDependency : dependencies)
         {
-            if (!dependencyFacet.hasDependency(oneDependency))
+            // let the user the choice of the version
+            final List<Dependency> versions = dependencyFacet.resolveAvailableVersions(oneDependency);
+            final Dependency version = shellPrompt.promptChoiceTyped("Which version of " + oneDependency.getArtifactId() + " would you like to use?", versions, versions.get(versions.size() - 1));
+
+            if (!dependencyFacet.hasDependency(version))
             {
-                dependencyFacet.addDependency(oneDependency);
+                dependencyFacet.addDependency(version);
             }
         }
     }
