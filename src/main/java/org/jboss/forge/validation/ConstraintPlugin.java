@@ -79,7 +79,7 @@ public class ConstraintPlugin implements Plugin
     }
 
     @Command(value = "Valid")
-    public void addNullConstraint(@Option(name = "on", completer = PropertyCompleter.class) String property) throws FileNotFoundException
+    public void addValidConstraint(@Option(name = "on", completer = PropertyCompleter.class) String property) throws FileNotFoundException
     {
         final Annotation<JavaClass> constraintAnnotation = addConstraintAnnotation(property, Valid.class);
         javaSourceFacet.saveJavaSource(constraintAnnotation.getOrigin());
