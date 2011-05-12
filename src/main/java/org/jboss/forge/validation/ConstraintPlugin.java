@@ -63,7 +63,7 @@ import static org.jboss.forge.validation.util.ResourceHelper.getJavaClassFromRes
 /**
  * @author Kevin Pollet
  */
-@Alias("new-constraint")
+@Alias("add-constraint")
 @RequiresResource({JavaResource.class, JavaFieldResource.class, JavaMethodResource.class})
 @RequiresFacet({ValidationFacet.class, JavaSourceFacet.class})
 public class ConstraintPlugin implements Plugin
