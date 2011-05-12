@@ -21,6 +21,8 @@
  */
 package org.jboss.forge.validation;
 
+import java.util.Set;
+
 import javax.enterprise.event.Event;
 import javax.enterprise.inject.spi.BeanManager;
 import javax.inject.Inject;
@@ -32,7 +34,6 @@ import org.jboss.forge.shell.events.InstallFacets;
 import org.jboss.forge.shell.plugins.Alias;
 import org.jboss.forge.shell.plugins.Command;
 import org.jboss.forge.shell.plugins.DefaultCommand;
-import org.jboss.forge.shell.plugins.Help;
 import org.jboss.forge.shell.plugins.Option;
 import org.jboss.forge.shell.plugins.PipeOut;
 import org.jboss.forge.shell.plugins.Plugin;
@@ -48,42 +49,39 @@ import org.jboss.shrinkwrap.descriptor.api.Descriptors;
  * @author Kevin Pollet
  */
 @Alias("validation")
-@Help("A plugin that helps setting up bean validation")
-@RequiresFacet(DependencyFacet.class)
 @RequiresProject
+@RequiresFacet(DependencyFacet.class)
 public class ValidationPlugin implements Plugin
 {
     private final Project project;
-    private final DependencyFacet dependencyFacet;
-    private final Event<InstallFacets> request;
     private final BeanManager beanManager;
+    private final Event<InstallFacets> request;
+    private final DependencyFacet dependencyFacet;
 
     @Inject
     public ValidationPlugin(Project project, Event<InstallFacets> request, BeanManager beanManager)
     {
         this.project = project;
-        this.dependencyFacet = project.getFacet(DependencyFacet.class);
-        this.request = request;
         this.beanManager = beanManager;
+        this.request = request;
+        this.dependencyFacet = project.getFacet(DependencyFacet.class);
     }
 
-    @DefaultCommand
+    @DefaultCommand(help = "Shows the status of the validation setup")
     public void status(PipeOut pipeOut)
     {
         if (project.hasFacet(ValidationFacet.class))
         {
-            pipeOut.println("Validation is installed.");
+            pipeOut.println("validation is installed.");
         }
         else
         {
-            pipeOut.println("Validation is not installed. Use 'validation setup' to get started.");
+            pipeOut.println("validation is not installed. Use 'validation setup' to get started.");
         }
     }
 
-    @Command("setup")
-    public void setup(@Option(name = "provider",
-            help = "Specify the bean validation provider",
-            defaultValue = "HIBERNATE_VALIDATOR", required = true) BVProvider provider,
+    @Command(value = "setup", help = "Setup validation for this project")
+    public void setup(@Option(name = "provider", defaultValue = "HIBERNATE_VALIDATOR", required = true) BVProvider provider,
                       @Option(name = "messageInterpolator") String messageInterpolator,
                       @Option(name = "traversableResolver") String traversableResolver,
                       @Option(name = "constraintValidatorFactory") String constraintValidatorFactory,
@@ -92,35 +90,22 @@ public class ValidationPlugin implements Plugin
 
         final ValidationProvider validationProvider = provider.getValidationProvider(beanManager);
 
-        // install facet if needed
         installValidationFacet();
+        installValidationProviderDependencies(validationProvider.getDependencies());
 
-        // create descriptor if needed
-        final ValidationFacet validationFacet = project.getFacet(ValidationFacet.class);
-
-        if (createDescriptor(messageInterpolator, traversableResolver, constraintValidatorFactory))
+        // create validation descriptor if needed
+        if (shouldCreateDescriptor(messageInterpolator, traversableResolver, constraintValidatorFactory))
         {
-            final ValidationDescriptor defaultDescriptor = validationProvider.getDefaultDescriptor();
-
+            final ValidationDescriptor providerDescriptor = validationProvider.getDefaultDescriptor();
             final ValidationDescriptor descriptor = Descriptors.create(ValidationDescriptor.class)
-                    .defaultProvider(defaultDescriptor.getDefaultProvider())
-                    .messageInterpolator(messageInterpolator == null ? defaultDescriptor.getMessageInterpolator() : messageInterpolator)
-                    .traversableResolver(traversableResolver == null ? defaultDescriptor.getTraversableResolver() : traversableResolver)
-                    .constraintValidatorFactory(constraintValidatorFactory == null ? defaultDescriptor.getConstraintValidatorFactory() : constraintValidatorFactory);
+                    .defaultProvider(providerDescriptor.getDefaultProvider())
+                    .messageInterpolator(messageInterpolator == null ? providerDescriptor.getMessageInterpolator() : messageInterpolator)
+                    .traversableResolver(traversableResolver == null ? providerDescriptor.getTraversableResolver() : traversableResolver)
+                    .constraintValidatorFactory(constraintValidatorFactory == null ? providerDescriptor.getConstraintValidatorFactory() : constraintValidatorFactory);
 
-            validationFacet.saveConfig(descriptor);
+            project.getFacet(ValidationFacet.class).saveConfig(descriptor);
+            pipeOut.println("Validation descriptor has been created successfully.");
         }
-
-        // add needed dependency
-        for (Dependency oneDependency : validationProvider.getDependencies())
-        {
-            if (!dependencyFacet.hasDependency(oneDependency))
-            {
-                dependencyFacet.addDependency(oneDependency);
-            }
-        }
-
-        pipeOut.println("Dependencies for provider [" + provider + "] has been added.");
     }
 
     private void installValidationFacet()
@@ -131,7 +116,18 @@ public class ValidationPlugin implements Plugin
         }
     }
 
-    private boolean createDescriptor(String userMessageInterpolator, String userTraversableResolver, String userConstraintValidatorFactory)
+    private void installValidationProviderDependencies(Set<Dependency> dependencies)
+    {
+        for (Dependency oneDependency : dependencies)
+        {
+            if (!dependencyFacet.hasDependency(oneDependency))
+            {
+                dependencyFacet.addDependency(oneDependency);
+            }
+        }
+    }
+
+    private boolean shouldCreateDescriptor(String userMessageInterpolator, String userTraversableResolver, String userConstraintValidatorFactory)
     {
         return userMessageInterpolator != null || userTraversableResolver != null || userConstraintValidatorFactory != null;
     }
