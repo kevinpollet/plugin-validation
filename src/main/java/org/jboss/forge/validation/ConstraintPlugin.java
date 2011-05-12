@@ -24,6 +24,7 @@ package org.jboss.forge.validation;
 import java.io.FileNotFoundException;
 
 import javax.inject.Inject;
+import javax.validation.Valid;
 import javax.validation.constraints.AssertFalse;
 import javax.validation.constraints.AssertTrue;
 import javax.validation.constraints.DecimalMax;
@@ -75,6 +76,14 @@ public class ConstraintPlugin implements Plugin
     {
         this.javaSourceFacet = project.getFacet(JavaSourceFacet.class);
         this.shell = shell;
+    }
+
+    @Command(value = "Valid")
+    public void addNullConstraint(@Option(name = "on", completer = PropertyCompleter.class) String property) throws FileNotFoundException
+    {
+        final Annotation<JavaClass> constraintAnnotation = addConstraintAnnotation(property, Valid.class);
+        javaSourceFacet.saveJavaSource(constraintAnnotation.getOrigin());
+        outputConstraintAdded(property, Valid.class);
     }
 
     @Command(value = "Null")
