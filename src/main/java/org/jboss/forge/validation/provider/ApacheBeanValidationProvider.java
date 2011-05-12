@@ -25,16 +25,16 @@ import java.util.HashSet;
 import java.util.Set;
 
 import org.jboss.forge.project.dependencies.Dependency;
+import org.jboss.forge.project.dependencies.DependencyBuilder;
 import org.jboss.forge.validation.api.ValidationDescriptor;
 import org.jboss.shrinkwrap.descriptor.api.Descriptors;
 
 import static java.util.Collections.unmodifiableSet;
-import static org.jboss.forge.project.dependencies.DependencyBuilder.create;
+import static org.jboss.forge.project.dependencies.ScopeType.PROVIDED;
 
 /**
  * @author Kevin Pollet
  */
-//TODO how to set to scope provided
 public class ApacheBeanValidationProvider implements ValidationProvider
 {
     private final ValidationDescriptor defaultDescriptor;
@@ -42,6 +42,7 @@ public class ApacheBeanValidationProvider implements ValidationProvider
 
     public ApacheBeanValidationProvider()
     {
+        // define apache bean validation default descriptor file
         this.defaultDescriptor = Descriptors.create(ValidationDescriptor.class)
                 .defaultProvider("org.apache.bval.jsr303.ApacheValidationProvider")
                 .messageInterpolator("org.apache.bval.jsr303.DefaultMessageInterpolator")
@@ -49,8 +50,15 @@ public class ApacheBeanValidationProvider implements ValidationProvider
                 .constraintValidatorFactory("org.apache.bval.jsr303.DefaultConstraintValidatorFactory");
 
         // add apache bean validation dependencies
+        final DependencyBuilder apacheBeanValidation = DependencyBuilder.create()
+                .setGroupId("org.apache.bval")
+                .setArtifactId("org.apache.bval.bundle")
+                .setVersion("0.3-incubating")
+                .setScopeType(PROVIDED);
+
         final Set<Dependency> tmpSet = new HashSet<Dependency>();
-        tmpSet.add(create("org.apache.bval:org.apache.bval.bundle:0.2-incubating"));
+        tmpSet.add(apacheBeanValidation);
+
         this.dependencies = unmodifiableSet(tmpSet);
     }
 
