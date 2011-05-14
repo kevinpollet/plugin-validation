@@ -22,7 +22,6 @@
 package org.jboss.forge.validation;
 
 import java.io.FileNotFoundException;
-
 import javax.inject.Inject;
 import javax.validation.Valid;
 import javax.validation.constraints.AssertFalse;
@@ -42,6 +41,7 @@ import javax.validation.constraints.Size;
 import org.jboss.forge.parser.java.Annotation;
 import org.jboss.forge.parser.java.Field;
 import org.jboss.forge.parser.java.JavaClass;
+import org.jboss.forge.parser.java.Method;
 import org.jboss.forge.project.Project;
 import org.jboss.forge.project.facets.JavaSourceFacet;
 import org.jboss.forge.resources.Resource;
@@ -56,6 +56,7 @@ import org.jboss.forge.shell.plugins.RequiresFacet;
 import org.jboss.forge.shell.plugins.RequiresResource;
 import org.jboss.forge.validation.api.ValidationFacet;
 import org.jboss.forge.validation.completer.PropertyCompleter;
+import org.jboss.forge.validation.util.JavaHelper;
 
 import static org.jboss.forge.validation.util.ResourceHelper.getJavaClassFromResource;
 
@@ -63,263 +64,280 @@ import static org.jboss.forge.validation.util.ResourceHelper.getJavaClassFromRes
  * @author Kevin Pollet
  */
 @Alias("add-constraint")
-@RequiresResource({JavaResource.class})
-@RequiresFacet({ValidationFacet.class, JavaSourceFacet.class})
-public class PropertyConstraintPlugin implements Plugin
-{
-    private final JavaSourceFacet javaSourceFacet;
-    private final Shell shell;
+@RequiresResource( { JavaResource.class })
+@RequiresFacet( { ValidationFacet.class, JavaSourceFacet.class })
+public class PropertyConstraintPlugin implements Plugin {
+	private final JavaSourceFacet javaSourceFacet;
+	private final Shell shell;
 
-    @Inject
-    public PropertyConstraintPlugin(Project project, Shell shell)
-    {
-        this.javaSourceFacet = project.getFacet(JavaSourceFacet.class);
-        this.shell = shell;
-    }
+	@Inject
+	public PropertyConstraintPlugin(Project project, Shell shell) {
+		this.javaSourceFacet = project.getFacet( JavaSourceFacet.class );
+		this.shell = shell;
+	}
 
-    @Command(value = "Valid")
-    public void addValidConstraint(@Option(name = "onProperty", completer = PropertyCompleter.class, required = true) String property,
-                                   PipeOut pipeOut) throws FileNotFoundException
-    {
-        final Annotation<JavaClass> constraint = addConstraintOnProperty(property, Valid.class);
+	@Command(value = "Valid")
+	public void addValidConstraint(@Option(name = "onProperty", completer = PropertyCompleter.class, required = true) String property,
+								   @Option(name = "onAccessor", flagOnly = true) boolean onAccessor,
+								   PipeOut pipeOut) throws FileNotFoundException {
 
-        javaSourceFacet.saveJavaSource(constraint.getOrigin());
-        outputConstraintAdded(pipeOut, property, Valid.class);
-    }
+		final Annotation<JavaClass> constraint = addConstraintOnProperty( property, onAccessor, Valid.class );
 
-    @Command(value = "Null")
-    public void addNullConstraint(@Option(name = "onProperty", completer = PropertyCompleter.class, required = true) String property,
-                                  @Option(name = "message") String message,
-                                  PipeOut pipeOut) throws FileNotFoundException
-    {
-        final Annotation<JavaClass> constraint = addConstraintOnProperty(property, Null.class);
-        setConstraintMessage(constraint, message);
+		javaSourceFacet.saveJavaSource( constraint.getOrigin() );
+		outputConstraintAdded( pipeOut, property, Valid.class );
+	}
 
-        javaSourceFacet.saveJavaSource(constraint.getOrigin());
-        outputConstraintAdded(pipeOut, property, Null.class);
-    }
+	@Command(value = "Null")
+	public void addNullConstraint(@Option(name = "onProperty", completer = PropertyCompleter.class, required = true) String property,
+								  @Option(name = "onAccessor", flagOnly = true) boolean onAccessor,
+								  @Option(name = "message") String message,
+								  PipeOut pipeOut) throws FileNotFoundException {
 
-    @Command(value = "NotNull")
-    public void addNotNullConstraint(@Option(name = "onProperty", completer = PropertyCompleter.class, required = true) String property,
-                                     @Option(name = "message") String message,
-                                     PipeOut pipeOut) throws FileNotFoundException
-    {
-        final Annotation<JavaClass> constraintAnnotation = addConstraintOnProperty(property, NotNull.class);
-        setConstraintMessage(constraintAnnotation, message);
+		final Annotation<JavaClass> constraint = addConstraintOnProperty( property, onAccessor, Null.class );
+		setConstraintMessage( constraint, message );
 
-        javaSourceFacet.saveJavaSource(constraintAnnotation.getOrigin());
-        outputConstraintAdded(pipeOut, property, NotNull.class);
-    }
+		javaSourceFacet.saveJavaSource( constraint.getOrigin() );
+		outputConstraintAdded( pipeOut, property, Null.class );
+	}
 
-    @Command(value = "AssertTrue")
-    public void addAssertTrueConstraint(@Option(name = "onProperty", completer = PropertyCompleter.class, required = true) String property,
-                                        @Option(name = "message") String message,
-                                        PipeOut pipeOut) throws FileNotFoundException
-    {
-        final Annotation<JavaClass> constraintAnnotation = addConstraintOnProperty(property, AssertTrue.class);
-        setConstraintMessage(constraintAnnotation, message);
+	@Command(value = "NotNull")
+	public void addNotNullConstraint(@Option(name = "onProperty", completer = PropertyCompleter.class, required = true) String property,
+									 @Option(name = "onAccessor", flagOnly = true) boolean onAccessor,
+									 @Option(name = "message") String message,
+									 PipeOut pipeOut) throws FileNotFoundException {
 
-        javaSourceFacet.saveJavaSource(constraintAnnotation.getOrigin());
-        outputConstraintAdded(pipeOut, property, AssertTrue.class);
-    }
+		final Annotation<JavaClass> constraintAnnotation = addConstraintOnProperty( property, onAccessor, NotNull.class );
+		setConstraintMessage( constraintAnnotation, message );
 
-    @Command(value = "AssertFalse")
-    public void addAssertFalseConstraint(@Option(name = "onProperty", completer = PropertyCompleter.class, required = true) String property,
-                                         @Option(name = "message") String message,
-                                         PipeOut pipeOut) throws FileNotFoundException
-    {
-        final Annotation<JavaClass> constraintAnnotation = addConstraintOnProperty(property, AssertFalse.class);
-        setConstraintMessage(constraintAnnotation, message);
+		javaSourceFacet.saveJavaSource( constraintAnnotation.getOrigin() );
+		outputConstraintAdded( pipeOut, property, NotNull.class );
+	}
 
-        javaSourceFacet.saveJavaSource(constraintAnnotation.getOrigin());
-        outputConstraintAdded(pipeOut, property, AssertFalse.class);
-    }
+	@Command(value = "AssertTrue")
+	public void addAssertTrueConstraint(@Option(name = "onProperty", completer = PropertyCompleter.class, required = true) String property,
+										@Option(name = "onAccessor", flagOnly = true) boolean onAccessor,
+										@Option(name = "message") String message,
+										PipeOut pipeOut) throws FileNotFoundException {
 
-    @Command(value = "Min")
-    public void addMinConstraint(@Option(name = "onProperty", completer = PropertyCompleter.class, required = true) String property,
-                                 @Option(name = "min", required = true) long min,
-                                 @Option(name = "message") String message,
-                                 PipeOut pipeOut) throws FileNotFoundException
-    {
-        final Annotation<JavaClass> constraintAnnotation = addConstraintOnProperty(property, Min.class);
-        setConstraintMessage(constraintAnnotation, message);
-        constraintAnnotation.setLiteralValue(String.valueOf(min));
+		final Annotation<JavaClass> constraintAnnotation = addConstraintOnProperty( property, onAccessor, AssertTrue.class );
+		setConstraintMessage( constraintAnnotation, message );
 
-        javaSourceFacet.saveJavaSource(constraintAnnotation.getOrigin());
-        outputConstraintAdded(pipeOut, property, Min.class);
-    }
+		javaSourceFacet.saveJavaSource( constraintAnnotation.getOrigin() );
+		outputConstraintAdded( pipeOut, property, AssertTrue.class );
+	}
 
-    @Command(value = "Max")
-    public void addMaxConstraint(@Option(name = "onProperty", completer = PropertyCompleter.class, required = true) String property,
-                                 @Option(name = "max", required = true) long max,
-                                 @Option(name = "message") String message,
-                                 PipeOut pipeOut) throws FileNotFoundException
-    {
-        final Annotation<JavaClass> constraintAnnotation = addConstraintOnProperty(property, Max.class);
-        setConstraintMessage(constraintAnnotation, message);
-        constraintAnnotation.setLiteralValue(String.valueOf(max));
+	@Command(value = "AssertFalse")
+	public void addAssertFalseConstraint(@Option(name = "onProperty", completer = PropertyCompleter.class, required = true) String property,
+										 @Option(name = "onAccessor", flagOnly = true) boolean onAccessor,
+										 @Option(name = "message") String message,
+										 PipeOut pipeOut) throws FileNotFoundException {
 
-        javaSourceFacet.saveJavaSource(constraintAnnotation.getOrigin());
-        outputConstraintAdded(pipeOut, property, Max.class);
-    }
+		final Annotation<JavaClass> constraintAnnotation = addConstraintOnProperty( property, onAccessor, AssertFalse.class );
+		setConstraintMessage( constraintAnnotation, message );
+
+		javaSourceFacet.saveJavaSource( constraintAnnotation.getOrigin() );
+		outputConstraintAdded( pipeOut, property, AssertFalse.class );
+	}
+
+	@Command(value = "Min")
+	public void addMinConstraint(@Option(name = "onProperty", completer = PropertyCompleter.class, required = true) String property,
+								 @Option(name = "onAccessor", flagOnly = true) boolean onAccessor,
+								 @Option(name = "min", required = true) long min,
+								 @Option(name = "message") String message,
+								 PipeOut pipeOut) throws FileNotFoundException {
+
+		final Annotation<JavaClass> constraintAnnotation = addConstraintOnProperty( property, onAccessor, Min.class );
+		setConstraintMessage( constraintAnnotation, message );
+		constraintAnnotation.setLiteralValue( String.valueOf( min ) );
+
+		javaSourceFacet.saveJavaSource( constraintAnnotation.getOrigin() );
+		outputConstraintAdded( pipeOut, property, Min.class );
+	}
+
+	@Command(value = "Max")
+	public void addMaxConstraint(@Option(name = "onProperty", completer = PropertyCompleter.class, required = true) String property,
+								 @Option(name = "onAccessor", flagOnly = true) boolean onAccessor,
+								 @Option(name = "max", required = true) long max,
+								 @Option(name = "message") String message,
+								 PipeOut pipeOut) throws FileNotFoundException {
+
+		final Annotation<JavaClass> constraintAnnotation = addConstraintOnProperty( property, onAccessor, Max.class );
+		setConstraintMessage( constraintAnnotation, message );
+		constraintAnnotation.setLiteralValue( String.valueOf( max ) );
+
+		javaSourceFacet.saveJavaSource( constraintAnnotation.getOrigin() );
+		outputConstraintAdded( pipeOut, property, Max.class );
+	}
 
 
-    @Command(value = "DecimalMin")
-    public void addDecimalMinConstraint(@Option(name = "onProperty", completer = PropertyCompleter.class, required = true) String property,
-                                        @Option(name = "min", required = true) String min,
-                                        @Option(name = "message") String message,
-                                        PipeOut pipeOut) throws FileNotFoundException
-    {
-        final Annotation<JavaClass> constraintAnnotation = addConstraintOnProperty(property, DecimalMin.class);
-        setConstraintMessage(constraintAnnotation, message);
-        constraintAnnotation.setStringValue(min);
+	@Command(value = "DecimalMin")
+	public void addDecimalMinConstraint(@Option(name = "onProperty", completer = PropertyCompleter.class, required = true) String property,
+										@Option(name = "onAccessor", flagOnly = true) boolean onAccessor,
+										@Option(name = "min", required = true) String min,
+										@Option(name = "message") String message,
+										PipeOut pipeOut) throws FileNotFoundException {
 
-        javaSourceFacet.saveJavaSource(constraintAnnotation.getOrigin());
-        outputConstraintAdded(pipeOut, property, DecimalMin.class);
-    }
+		final Annotation<JavaClass> constraintAnnotation = addConstraintOnProperty( property, onAccessor, DecimalMin.class );
+		setConstraintMessage( constraintAnnotation, message );
+		constraintAnnotation.setStringValue( min );
 
-    @Command(value = "DecimalMax")
-    public void addDecimalMaxConstraint(@Option(name = "onProperty", completer = PropertyCompleter.class, required = true) String property,
-                                        @Option(name = "max", required = true) String max,
-                                        @Option(name = "message") String message,
-                                        PipeOut pipeOut) throws FileNotFoundException
-    {
-        final Annotation<JavaClass> constraintAnnotation = addConstraintOnProperty(property, DecimalMax.class);
-        setConstraintMessage(constraintAnnotation, message);
-        constraintAnnotation.setStringValue(max);
+		javaSourceFacet.saveJavaSource( constraintAnnotation.getOrigin() );
+		outputConstraintAdded( pipeOut, property, DecimalMin.class );
+	}
 
-        javaSourceFacet.saveJavaSource(constraintAnnotation.getOrigin());
-        outputConstraintAdded(pipeOut, property, DecimalMax.class);
-    }
+	@Command(value = "DecimalMax")
+	public void addDecimalMaxConstraint(@Option(name = "onProperty", completer = PropertyCompleter.class, required = true) String property,
+										@Option(name = "onAccessor", flagOnly = true) boolean onAccessor,
+										@Option(name = "max", required = true) String max,
+										@Option(name = "message") String message,
+										PipeOut pipeOut) throws FileNotFoundException {
 
-    @Command(value = "Size")
-    public void addSizeConstraint(@Option(name = "onProperty", completer = PropertyCompleter.class, required = true) String property,
-                                  @Option(name = "min") Integer min,
-                                  @Option(name = "max") Integer max,
-                                  @Option(name = "message") String message,
-                                  PipeOut pipeOut) throws FileNotFoundException
-    {
-        final Annotation<JavaClass> constraintAnnotation = addConstraintOnProperty(property, Size.class);
-        setConstraintMessage(constraintAnnotation, message);
+		final Annotation<JavaClass> constraintAnnotation = addConstraintOnProperty( property, onAccessor, DecimalMax.class );
+		setConstraintMessage( constraintAnnotation, message );
+		constraintAnnotation.setStringValue( max );
 
-        if (min != null)
-        {
-            constraintAnnotation.setLiteralValue("min", String.valueOf(min));
-        }
+		javaSourceFacet.saveJavaSource( constraintAnnotation.getOrigin() );
+		outputConstraintAdded( pipeOut, property, DecimalMax.class );
+	}
 
-        if (max != null)
-        {
-            constraintAnnotation.setLiteralValue("max", String.valueOf(max));
-        }
+	@Command(value = "Size")
+	public void addSizeConstraint(@Option(name = "onProperty", completer = PropertyCompleter.class, required = true) String property,
+								  @Option(name = "onAccessor", flagOnly = true) boolean onAccessor,
+								  @Option(name = "min") Integer min,
+								  @Option(name = "max") Integer max,
+								  @Option(name = "message") String message,
+								  PipeOut pipeOut) throws FileNotFoundException {
 
-        javaSourceFacet.saveJavaSource(constraintAnnotation.getOrigin());
-        outputConstraintAdded(pipeOut, property, Size.class);
-    }
+		final Annotation<JavaClass> constraintAnnotation = addConstraintOnProperty( property, onAccessor, Size.class );
+		setConstraintMessage( constraintAnnotation, message );
 
-    @Command(value = "Digits")
-    public void addDigitsConstraint(@Option(name = "onProperty", completer = PropertyCompleter.class, required = true) String property,
-                                    @Option(name = "integer") int integer,
-                                    @Option(name = "fraction") int fraction,
-                                    @Option(name = "message") String message,
-                                    PipeOut pipeOut) throws FileNotFoundException
-    {
-        final Annotation<JavaClass> constraintAnnotation = addConstraintOnProperty(property, Digits.class);
-        setConstraintMessage(constraintAnnotation, message);
-        constraintAnnotation.setLiteralValue("integer", String.valueOf(integer));
-        constraintAnnotation.setLiteralValue("fraction", String.valueOf(fraction));
+		if ( min != null ) {
+			constraintAnnotation.setLiteralValue( "min", String.valueOf( min ) );
+		}
 
-        javaSourceFacet.saveJavaSource(constraintAnnotation.getOrigin());
-        outputConstraintAdded(pipeOut, property, Digits.class);
-    }
+		if ( max != null ) {
+			constraintAnnotation.setLiteralValue( "max", String.valueOf( max ) );
+		}
 
-    @Command(value = "Past")
-    public void addPastConstraint(@Option(name = "onProperty", completer = PropertyCompleter.class, required = true) String property,
-                                  @Option(name = "message") String message,
-                                  PipeOut pipeOut) throws FileNotFoundException
-    {
-        final Annotation<JavaClass> constraintAnnotation = addConstraintOnProperty(property, Past.class);
-        setConstraintMessage(constraintAnnotation, message);
+		javaSourceFacet.saveJavaSource( constraintAnnotation.getOrigin() );
+		outputConstraintAdded( pipeOut, property, Size.class );
+	}
 
-        javaSourceFacet.saveJavaSource(constraintAnnotation.getOrigin());
-        outputConstraintAdded(pipeOut, property, Past.class);
-    }
+	@Command(value = "Digits")
+	public void addDigitsConstraint(@Option(name = "onProperty", completer = PropertyCompleter.class, required = true) String property,
+									@Option(name = "onAccessor", flagOnly = true) boolean onAccessor,
+									@Option(name = "integer") int integer,
+									@Option(name = "fraction") int fraction,
+									@Option(name = "message") String message,
+									PipeOut pipeOut) throws FileNotFoundException {
 
-    @Command(value = "Future")
-    public void addFutureConstraint(@Option(name = "onProperty", completer = PropertyCompleter.class, required = true) String property,
-                                    @Option(name = "message") String message,
-                                    PipeOut pipeOut) throws FileNotFoundException
-    {
-        final Annotation<JavaClass> constraintAnnotation = addConstraintOnProperty(property, Future.class);
-        setConstraintMessage(constraintAnnotation, message);
+		final Annotation<JavaClass> constraintAnnotation = addConstraintOnProperty( property, onAccessor, Digits.class );
+		setConstraintMessage( constraintAnnotation, message );
+		constraintAnnotation.setLiteralValue( "integer", String.valueOf( integer ) );
+		constraintAnnotation.setLiteralValue( "fraction", String.valueOf( fraction ) );
 
-        javaSourceFacet.saveJavaSource(constraintAnnotation.getOrigin());
-        outputConstraintAdded(pipeOut, property, Future.class);
-    }
+		javaSourceFacet.saveJavaSource( constraintAnnotation.getOrigin() );
+		outputConstraintAdded( pipeOut, property, Digits.class );
+	}
 
-    @Command(value = "Pattern")
-    public void addPatternConstraint(@Option(name = "onProperty", completer = PropertyCompleter.class, required = true) String property,
-                                     @Option(name = "regexp", required = true) String regexp,
-                                     @Option(name = "flags") Pattern.Flag[] flags,
-                                     @Option(name = "message") String message,
-                                     PipeOut pipeOut) throws FileNotFoundException
-    {
-        final Annotation<JavaClass> constraintAnnotation = addConstraintOnProperty(property, Pattern.class);
-        setConstraintMessage(constraintAnnotation, message);
-        constraintAnnotation.setStringValue("regexp", regexp);
+	@Command(value = "Past")
+	public void addPastConstraint(@Option(name = "onProperty", completer = PropertyCompleter.class, required = true) String property,
+								  @Option(name = "onAccessor", flagOnly = true) boolean onAccessor,
+								  @Option(name = "message") String message,
+								  PipeOut pipeOut) throws FileNotFoundException {
 
-        constraintAnnotation.getOrigin().addImport(Pattern.Flag.class);
-        final StringBuilder flagsLiteral = new StringBuilder();
-        flagsLiteral.append('{');
-        if (flags != null)
-        {
-            int i = 0;
-            for (Pattern.Flag oneFlag : flags)
-            {
-                flagsLiteral.append(oneFlag);
-                if (i < (flags.length - 1))
-                {
-                    flagsLiteral.append(",");
-                }
-                i++;
-            }
-        }
-        flagsLiteral.append('}');
+		final Annotation<JavaClass> constraintAnnotation = addConstraintOnProperty( property, onAccessor, Past.class );
+		setConstraintMessage( constraintAnnotation, message );
 
-        constraintAnnotation.setStringValue("flags", flagsLiteral.toString());
+		javaSourceFacet.saveJavaSource( constraintAnnotation.getOrigin() );
+		outputConstraintAdded( pipeOut, property, Past.class );
+	}
 
-        javaSourceFacet.saveJavaSource(constraintAnnotation.getOrigin());
-        outputConstraintAdded(pipeOut, property, Pattern.class);
-    }
+	@Command(value = "Future")
+	public void addFutureConstraint(@Option(name = "onProperty", completer = PropertyCompleter.class, required = true) String property,
+									@Option(name = "onAccessor", flagOnly = true) boolean onAccessor,
+									@Option(name = "message") String message,
+									PipeOut pipeOut) throws FileNotFoundException {
 
-    //TODO allow constraint on property accessor
-    private Annotation<JavaClass> addConstraintOnProperty(String property, Class<? extends java.lang.annotation.Annotation> annotationClass) throws FileNotFoundException
-    {
-        final Resource<?> currentResource = shell.getCurrentResource();
-        final JavaClass clazz = getJavaClassFromResource(currentResource);
-        final Field<JavaClass> field = clazz.getField(property);
+		final Annotation<JavaClass> constraintAnnotation = addConstraintOnProperty( property, onAccessor, Future.class );
+		setConstraintMessage( constraintAnnotation, message );
 
-        if (field == null)
-        {
-            throw new IllegalStateException("The current class has no property named '" + property + "'");
-        }
-        else if (field.hasAnnotation(annotationClass))
-        {
-            throw new IllegalStateException("The property named '" + property + "' is already annotated with " + annotationClass.getSimpleName());
-        }
+		javaSourceFacet.saveJavaSource( constraintAnnotation.getOrigin() );
+		outputConstraintAdded( pipeOut, property, Future.class );
+	}
 
-        return field.addAnnotation(annotationClass);
-    }
+	@Command(value = "Pattern")
+	public void addPatternConstraint(@Option(name = "onProperty", completer = PropertyCompleter.class, required = true) String property,
+									 @Option(name = "onAccessor", flagOnly = true) boolean onAccessor,
+									 @Option(name = "regexp", required = true) String regexp,
+									 @Option(name = "flags") Pattern.Flag[] flags,
+									 @Option(name = "message") String message,
+									 PipeOut pipeOut) throws FileNotFoundException {
 
-    private void setConstraintMessage(Annotation<JavaClass> annotation, String message)
-    {
-        if (message != null)
-        {
-            annotation.setStringValue("message", message);
-        }
-    }
+		final Annotation<JavaClass> constraintAnnotation = addConstraintOnProperty( property, onAccessor, Pattern.class );
+		setConstraintMessage( constraintAnnotation, message );
+		constraintAnnotation.setStringValue( "regexp", regexp );
 
-    private void outputConstraintAdded(PipeOut pipeOut, String property, Class<? extends java.lang.annotation.Annotation> constraintClass)
-    {
-        pipeOut.println("Constraint " + constraintClass.getSimpleName() + " has been successfully added on property named '" + property + "'");
-    }
+		constraintAnnotation.getOrigin().addImport( Pattern.Flag.class );
+		final StringBuilder flagsLiteral = new StringBuilder();
+		flagsLiteral.append( '{' );
+		if ( flags != null ) {
+			int i = 0;
+			for ( Pattern.Flag oneFlag : flags ) {
+				flagsLiteral.append( oneFlag );
+				if ( i < ( flags.length - 1 ) ) {
+					flagsLiteral.append( "," );
+				}
+				i++;
+			}
+		}
+		flagsLiteral.append( '}' );
+
+		constraintAnnotation.setStringValue( "flags", flagsLiteral.toString() );
+
+		javaSourceFacet.saveJavaSource( constraintAnnotation.getOrigin() );
+		outputConstraintAdded( pipeOut, property, Pattern.class );
+	}
+
+	private Annotation<JavaClass> addConstraintOnProperty(String property, boolean onAccessor, Class<? extends java.lang.annotation.Annotation> annotationClass)
+			throws FileNotFoundException {
+		final Resource<?> currentResource = shell.getCurrentResource();
+		final JavaClass clazz = getJavaClassFromResource( currentResource );
+		final Field<JavaClass> field = clazz.getField( property );
+
+		if ( field == null ) {
+			throw new IllegalStateException( "The current class has no property named '" + property + "'" );
+		}
+
+		if ( onAccessor ) {
+			final Method<JavaClass> accessor = JavaHelper.getFieldAccessor( field );
+			if ( accessor == null ) {
+				throw new IllegalStateException( "The property named '" + property + "' has no accessor" );
+			}
+			if ( accessor.hasAnnotation( annotationClass ) ) {
+				throw new IllegalStateException(
+						"The accessor fo the property named '" + property + "' is already annotated with " + annotationClass.getSimpleName()
+				);
+			}
+			return accessor.addAnnotation( annotationClass );
+		}
+		else {
+			if ( field.hasAnnotation( annotationClass ) ) {
+				throw new IllegalStateException(
+						"The property named '" + property + "' is already annotated with " + annotationClass.getSimpleName()
+				);
+			}
+			return field.addAnnotation( annotationClass );
+		}
+	}
+
+	private void setConstraintMessage(Annotation<JavaClass> annotation, String message) {
+		if ( message != null ) {
+			annotation.setStringValue( "message", message );
+		}
+	}
+
+	private void outputConstraintAdded(PipeOut pipeOut, String property, Class<? extends java.lang.annotation.Annotation> constraintClass) {
+		pipeOut.println( "Constraint " + constraintClass.getSimpleName() + " has been successfully added on property named '" + property + "'" );
+	}
 }
