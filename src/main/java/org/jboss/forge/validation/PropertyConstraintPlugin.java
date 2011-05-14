@@ -316,7 +316,7 @@ public class PropertyConstraintPlugin implements Plugin {
 			}
 			if ( accessor.hasAnnotation( annotationClass ) ) {
 				throw new IllegalStateException(
-						"The accessor fo the property named '" + property + "' is already annotated with " + annotationClass.getSimpleName()
+						"The accessor fo the property named '" + property + "' is already annotated with @" + annotationClass.getSimpleName()
 				);
 			}
 			return accessor.addAnnotation( annotationClass );
@@ -324,7 +324,7 @@ public class PropertyConstraintPlugin implements Plugin {
 		else {
 			if ( field.hasAnnotation( annotationClass ) ) {
 				throw new IllegalStateException(
-						"The property named '" + property + "' is already annotated with " + annotationClass.getSimpleName()
+						"The property named '" + property + "' is already annotated with @" + annotationClass.getSimpleName()
 				);
 			}
 			return field.addAnnotation( annotationClass );
