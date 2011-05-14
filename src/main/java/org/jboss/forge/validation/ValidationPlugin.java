@@ -30,13 +30,11 @@ import javax.inject.Inject;
 
 import org.jboss.forge.project.Project;
 import org.jboss.forge.project.dependencies.Dependency;
-import org.jboss.forge.project.dependencies.DependencyBuilder;
 import org.jboss.forge.project.facets.DependencyFacet;
 import org.jboss.forge.shell.ShellPrompt;
 import org.jboss.forge.shell.events.InstallFacets;
 import org.jboss.forge.shell.plugins.Alias;
 import org.jboss.forge.shell.plugins.Command;
-import org.jboss.forge.shell.plugins.DefaultCommand;
 import org.jboss.forge.shell.plugins.Option;
 import org.jboss.forge.shell.plugins.PipeOut;
 import org.jboss.forge.shell.plugins.Plugin;
@@ -47,8 +45,6 @@ import org.jboss.forge.validation.api.ValidationFacet;
 import org.jboss.forge.validation.provider.BVProvider;
 import org.jboss.forge.validation.provider.ValidationProvider;
 import org.jboss.shrinkwrap.descriptor.api.Descriptors;
-
-import static org.jboss.forge.project.dependencies.ScopeType.PROVIDED;
 
 /**
  * @author Kevin Pollet
@@ -62,8 +58,6 @@ public class ValidationPlugin implements Plugin
     private final BeanManager beanManager;
     private final Event<InstallFacets> request;
     private final DependencyFacet dependencyFacet;
-    private final Dependency javaee6SpecAPI;
-    private final Dependency beanValidationAPI;
     private final ShellPrompt shellPrompt;
 
     @Inject
@@ -74,31 +68,6 @@ public class ValidationPlugin implements Plugin
         this.request = request;
         this.dependencyFacet = project.getFacet(DependencyFacet.class);
         this.shellPrompt = shellPrompt;
-
-        this.javaee6SpecAPI = DependencyBuilder.create()
-                .setGroupId("org.jboss.spec")
-                .setArtifactId("jboss-javaee-6.0")
-                .setVersion("1.0.0.Final")
-                .setScopeType(PROVIDED);
-
-        this.beanValidationAPI = DependencyBuilder.create()
-                .setGroupId("javax.validation")
-                .setArtifactId("validation-api")
-                .setVersion("1.0.0.GA")
-                .setScopeType(PROVIDED);
-    }
-
-    @DefaultCommand(help = "Shows the status of the validation setup")
-    public void status(PipeOut pipeOut)
-    {
-        if (project.hasFacet(ValidationFacet.class))
-        {
-            pipeOut.println("validation is installed.");
-        }
-        else
-        {
-            pipeOut.println("validation is not installed. Use 'validation setup' to get started.");
-        }
     }
 
     @Command(value = "setup", help = "Setup validation for this project")
@@ -112,7 +81,6 @@ public class ValidationPlugin implements Plugin
         final ValidationProvider validationProvider = provider.getValidationProvider(beanManager);
 
         installValidationFacet();
-        installValidationDependencies();
         installValidationProviderDependencies(validationProvider.getDependencies());
 
         // create validation descriptor if needed
@@ -135,14 +103,6 @@ public class ValidationPlugin implements Plugin
         if (!project.hasFacet(ValidationFacet.class))
         {
             request.fire(new InstallFacets(ValidationFacet.class));
-        }
-    }
-
-    private void installValidationDependencies()
-    {
-        if (!dependencyFacet.hasDependency(javaee6SpecAPI) && !dependencyFacet.hasDependency(beanValidationAPI))
-        {
-            dependencyFacet.addDependency(beanValidationAPI);
         }
     }
 

@@ -23,6 +23,8 @@ package org.jboss.forge.validation;
 
 import java.io.File;
 
+import org.jboss.forge.project.dependencies.Dependency;
+import org.jboss.forge.project.dependencies.DependencyBuilder;
 import org.jboss.forge.project.facets.BaseFacet;
 import org.jboss.forge.project.facets.DependencyFacet;
 import org.jboss.forge.project.facets.ResourceFacet;
@@ -34,6 +36,8 @@ import org.jboss.forge.validation.api.ValidationFacet;
 import org.jboss.shrinkwrap.descriptor.api.DescriptorImporter;
 import org.jboss.shrinkwrap.descriptor.api.Descriptors;
 
+import static org.jboss.forge.project.dependencies.ScopeType.PROVIDED;
+
 /**
  * @author Kevin Pollet
  */
@@ -41,6 +45,17 @@ import org.jboss.shrinkwrap.descriptor.api.Descriptors;
 @RequiresFacet({ResourceFacet.class, DependencyFacet.class})
 public class ValidationFacetImpl extends BaseFacet implements ValidationFacet
 {
+    private final Dependency javaee6SpecAPI;
+
+    public ValidationFacetImpl()
+    {
+        this.javaee6SpecAPI = DependencyBuilder.create()
+                .setGroupId("org.jboss.spec")
+                .setArtifactId("jboss-javaee-6.0")
+                .setVersion("1.0.0.Final")
+                .setScopeType(PROVIDED);
+    }
+
     @Override
     public ValidationDescriptor getConfig()
     {
@@ -56,8 +71,8 @@ public class ValidationFacetImpl extends BaseFacet implements ValidationFacet
     @Override
     public FileResource<?> getConfigFile()
     {
-        final ResourceFacet resourceFacet = project.getFacet(ResourceFacet.class);
-        return resourceFacet.getResource("META-INF" + File.separator + "validation.xml");
+        final ResourceFacet facet = project.getFacet(ResourceFacet.class);
+        return facet.getResource("META-INF" + File.separator + "validation.xml");
     }
 
     @Override
@@ -73,7 +88,11 @@ public class ValidationFacetImpl extends BaseFacet implements ValidationFacet
     {
         if (!isInstalled())
         {
-            // creates an empty descriptor file. This file is used as a marker to know if the facet is installed.
+            final DependencyFacet facet = project.getFacet(DependencyFacet.class);
+            if (!facet.hasDependency(javaee6SpecAPI))
+            {
+                facet.addDependency(javaee6SpecAPI);
+            }
             saveConfig(Descriptors.create(ValidationDescriptor.class));
         }
         return true;
@@ -82,6 +101,7 @@ public class ValidationFacetImpl extends BaseFacet implements ValidationFacet
     @Override
     public boolean isInstalled()
     {
-        return getConfigFile().exists();
+        final DependencyFacet facet = project.getFacet(DependencyFacet.class);
+        return getConfigFile().exists() && facet.hasDependency(javaee6SpecAPI);
     }
 }
