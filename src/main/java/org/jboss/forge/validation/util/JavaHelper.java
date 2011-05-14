@@ -28,38 +28,46 @@ import org.jboss.forge.parser.java.Method;
 /**
  * @author Kevin Pollet
  */
-public final class JavaHelper {
-	private static final String GET_PREFIX = "get";
-	private static final String IS_PREFIX = "is";
+public final class JavaHelper
+{
+    private static final String GET_PREFIX = "get";
+    private static final String IS_PREFIX = "is";
 
-	// disallow instantiation of this helper class
-	private JavaHelper() {
-	}
+    // disallow instantiation of this helper class
+    private JavaHelper()
+    {
+    }
 
-	public static Method<JavaClass> getFieldAccessor(Field<JavaClass> field) {
-		if ( field == null ) {
-			throw new IllegalArgumentException( "The given field cannot be null" );
-		}
+    public static Method<JavaClass> getFieldAccessor(Field<JavaClass> field)
+    {
+        if (field == null)
+        {
+            throw new IllegalArgumentException("The given field cannot be null");
+        }
 
-		final JavaClass javaClass = field.getOrigin();
-		final String accessorMethodSuffix = getAccessorMethodSuffix( field );
+        final JavaClass javaClass = field.getOrigin();
+        final String accessorMethodSuffix = getAccessorMethodSuffix(field);
 
-		Method<JavaClass> method = javaClass.getMethod( GET_PREFIX + accessorMethodSuffix );
-		if ( method == null && field.isType( Boolean.class ) ) {
-			method = javaClass.getMethod( IS_PREFIX + accessorMethodSuffix );
-		}
-		return method;
-	}
+        Method<JavaClass> method = javaClass.getMethod(GET_PREFIX + accessorMethodSuffix);
+        if (method == null && field.isType(Boolean.class))
+        {
+            method = javaClass.getMethod(IS_PREFIX + accessorMethodSuffix);
+        }
+        return method;
+    }
 
-	private static String getAccessorMethodSuffix(Field<JavaClass> field) {
-		final String fieldName = field.getName();
-		final StringBuilder methodSuffix = new StringBuilder();
-		if ( fieldName.length() > 0 ) {
-			methodSuffix.append( Character.toUpperCase( fieldName.charAt( 0 ) ) );
-			if ( fieldName.length() > 1 ) {
-				methodSuffix.append( fieldName.substring( 1, fieldName.length() ) );
-			}
-		}
-		return methodSuffix.toString();
-	}
+    private static String getAccessorMethodSuffix(Field<JavaClass> field)
+    {
+        final String fieldName = field.getName();
+        final StringBuilder methodSuffix = new StringBuilder();
+        if (fieldName.length() > 0)
+        {
+            methodSuffix.append(Character.toUpperCase(fieldName.charAt(0)));
+            if (fieldName.length() > 1)
+            {
+                methodSuffix.append(fieldName.substring(1, fieldName.length()));
+            }
+        }
+        return methodSuffix.toString();
+    }
 }
