@@ -80,7 +80,7 @@ public class PropertyConstraintPlugin implements Plugin
         this.shell = shell;
     }
 
-    @Command(value = "Valid")
+    @Command(value = "Valid", help = "Adds @Valid constraint on the specified property")
     public void addValidConstraint(@Option(name = "onProperty", completer = PropertyCompleter.class, required = true) String property,
                                    @Option(name = "onAccessor", flagOnly = true) boolean onAccessor,
                                    PipeOut pipeOut) throws FileNotFoundException
@@ -92,7 +92,7 @@ public class PropertyConstraintPlugin implements Plugin
         outputConstraintAdded(pipeOut, property, Valid.class);
     }
 
-    @Command(value = "Null")
+    @Command(value = "Null", help = "Adds @Null constraint on the specified property")
     public void addNullConstraint(@Option(name = "onProperty", completer = PropertyCompleter.class, required = true) String property,
                                   @Option(name = "onAccessor", flagOnly = true) boolean onAccessor,
                                   @Option(name = "message") String message,
@@ -106,7 +106,7 @@ public class PropertyConstraintPlugin implements Plugin
         outputConstraintAdded(pipeOut, property, Null.class);
     }
 
-    @Command(value = "NotNull")
+    @Command(value = "NotNull", help = "Adds @NotNull constraint on the specified property")
     public void addNotNullConstraint(@Option(name = "onProperty", completer = PropertyCompleter.class, required = true) String property,
                                      @Option(name = "onAccessor", flagOnly = true) boolean onAccessor,
                                      @Option(name = "message") String message,
@@ -120,7 +120,7 @@ public class PropertyConstraintPlugin implements Plugin
         outputConstraintAdded(pipeOut, property, NotNull.class);
     }
 
-    @Command(value = "AssertTrue")
+    @Command(value = "AssertTrue", help = "Adds @AssertTrue constraint on the specified property")
     public void addAssertTrueConstraint(@Option(name = "onProperty", completer = PropertyCompleter.class, required = true) String property,
                                         @Option(name = "onAccessor", flagOnly = true) boolean onAccessor,
                                         @Option(name = "message") String message,
@@ -134,7 +134,7 @@ public class PropertyConstraintPlugin implements Plugin
         outputConstraintAdded(pipeOut, property, AssertTrue.class);
     }
 
-    @Command(value = "AssertFalse")
+    @Command(value = "AssertFalse", help = "Adds @AssertFalse constraint on the specified property")
     public void addAssertFalseConstraint(@Option(name = "onProperty", completer = PropertyCompleter.class, required = true) String property,
                                          @Option(name = "onAccessor", flagOnly = true) boolean onAccessor,
                                          @Option(name = "message") String message,
@@ -148,7 +148,7 @@ public class PropertyConstraintPlugin implements Plugin
         outputConstraintAdded(pipeOut, property, AssertFalse.class);
     }
 
-    @Command(value = "Min")
+    @Command(value = "Min", help = "Adds @Min constraint on the specified property")
     public void addMinConstraint(@Option(name = "onProperty", completer = PropertyCompleter.class, required = true) String property,
                                  @Option(name = "onAccessor", flagOnly = true) boolean onAccessor,
                                  @Option(name = "min", required = true) long min,
@@ -164,7 +164,7 @@ public class PropertyConstraintPlugin implements Plugin
         outputConstraintAdded(pipeOut, property, Min.class);
     }
 
-    @Command(value = "Max")
+    @Command(value = "Max", help = "Adds @Max constraint on the specified property")
     public void addMaxConstraint(@Option(name = "onProperty", completer = PropertyCompleter.class, required = true) String property,
                                  @Option(name = "onAccessor", flagOnly = true) boolean onAccessor,
                                  @Option(name = "max", required = true) long max,
@@ -181,7 +181,7 @@ public class PropertyConstraintPlugin implements Plugin
     }
 
 
-    @Command(value = "DecimalMin")
+    @Command(value = "DecimalMin", help = "Adds @DecimalMin constraint on the specified property")
     public void addDecimalMinConstraint(@Option(name = "onProperty", completer = PropertyCompleter.class, required = true) String property,
                                         @Option(name = "onAccessor", flagOnly = true) boolean onAccessor,
                                         @Option(name = "min", required = true) String min,
@@ -197,7 +197,7 @@ public class PropertyConstraintPlugin implements Plugin
         outputConstraintAdded(pipeOut, property, DecimalMin.class);
     }
 
-    @Command(value = "DecimalMax")
+    @Command(value = "DecimalMax", help = "Adds @DecimalMax constraint on the specified property")
     public void addDecimalMaxConstraint(@Option(name = "onProperty", completer = PropertyCompleter.class, required = true) String property,
                                         @Option(name = "onAccessor", flagOnly = true) boolean onAccessor,
                                         @Option(name = "max", required = true) String max,
@@ -213,7 +213,7 @@ public class PropertyConstraintPlugin implements Plugin
         outputConstraintAdded(pipeOut, property, DecimalMax.class);
     }
 
-    @Command(value = "Size")
+    @Command(value = "Size", help = "Adds @Size constraint on the specified property")
     public void addSizeConstraint(@Option(name = "onProperty", completer = PropertyCompleter.class, required = true) String property,
                                   @Option(name = "onAccessor", flagOnly = true) boolean onAccessor,
                                   @Option(name = "min") Integer min,
@@ -239,7 +239,7 @@ public class PropertyConstraintPlugin implements Plugin
         outputConstraintAdded(pipeOut, property, Size.class);
     }
 
-    @Command(value = "Digits")
+    @Command(value = "Digits", help = "Adds @Digits constraint on the specified property")
     public void addDigitsConstraint(@Option(name = "onProperty", completer = PropertyCompleter.class, required = true) String property,
                                     @Option(name = "onAccessor", flagOnly = true) boolean onAccessor,
                                     @Option(name = "integer") int integer,
@@ -257,7 +257,7 @@ public class PropertyConstraintPlugin implements Plugin
         outputConstraintAdded(pipeOut, property, Digits.class);
     }
 
-    @Command(value = "Past")
+    @Command(value = "Past", help = "Adds @Past constraint on the specified property")
     public void addPastConstraint(@Option(name = "onProperty", completer = PropertyCompleter.class, required = true) String property,
                                   @Option(name = "onAccessor", flagOnly = true) boolean onAccessor,
                                   @Option(name = "message") String message,
@@ -271,7 +271,7 @@ public class PropertyConstraintPlugin implements Plugin
         outputConstraintAdded(pipeOut, property, Past.class);
     }
 
-    @Command(value = "Future")
+    @Command(value = "Future", help = "Adds @Future constraint on the specified property")
     public void addFutureConstraint(@Option(name = "onProperty", completer = PropertyCompleter.class, required = true) String property,
                                     @Option(name = "onAccessor", flagOnly = true) boolean onAccessor,
                                     @Option(name = "message") String message,
@@ -285,7 +285,7 @@ public class PropertyConstraintPlugin implements Plugin
         outputConstraintAdded(pipeOut, property, Future.class);
     }
 
-    @Command(value = "Pattern")
+    @Command(value = "Pattern", help = "Adds @Pattern constraint on the specified property")
     public void addPatternConstraint(@Option(name = "onProperty", completer = PropertyCompleter.class, required = true) String property,
                                      @Option(name = "onAccessor", flagOnly = true) boolean onAccessor,
                                      @Option(name = "regexp", required = true) String regexp,
