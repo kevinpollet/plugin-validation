@@ -91,10 +91,7 @@ public class MetawidgetConfigurator implements ScaffoldConfigurator
 
                         final Transformer transformer = TransformerFactory.newInstance().newTransformer();
                         transformer.setOutputProperty(OutputKeys.INDENT, "yes");
-
-                        final Result result = new StreamResult(metawidgetConfigFile);
-                        final Source source = new DOMSource(document);
-                        transformer.transform(source, result);
+                        transformer.transform(new DOMSource(document), new StreamResult(metawidgetConfigFile));
                     }
 
                 } catch (ParserConfigurationException e)
