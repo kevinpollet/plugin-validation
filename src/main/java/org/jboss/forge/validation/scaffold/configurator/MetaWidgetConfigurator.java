@@ -69,13 +69,14 @@ public class MetawidgetConfigurator implements ScaffoldConfigurator
                     {
                         final Element beanValidationInspector = document.createElement("beanValidationInspector");
                         beanValidationInspector.setAttribute("xmlns", "java:org.metawidget.inspector.beanvalidation");
+                        beanValidationInspector.setAttribute("config", "org.metawidget.inspector.impl.BaseObjectInspectorConfig");
 
                         final Element propertyStyle = document.createElement("propertyStyle");
                         beanValidationInspector.appendChild(propertyStyle);
 
                         final Element javaBeanPropertyStyle = document.createElement("javaBeanPropertyStyle");
                         javaBeanPropertyStyle.setAttribute("xmlns", "java:org.metawidget.inspector.impl.propertystyle.javabean");
-                        javaBeanPropertyStyle.setAttribute("config", "java:org.metawidget.inspector.impl.propertystyle BeanPropertyStyleConfig");
+                        javaBeanPropertyStyle.setAttribute("config", "JavaBeanPropertyStyleConfig");
                         propertyStyle.appendChild(javaBeanPropertyStyle);
 
                         final Element privateFieldConvention = document.createElement("privateFieldConvention");
