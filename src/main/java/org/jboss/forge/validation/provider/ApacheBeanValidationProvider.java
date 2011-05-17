@@ -21,7 +21,8 @@
  */
 package org.jboss.forge.validation.provider;
 
-import java.util.HashSet;
+import java.util.Collections;
+import java.util.LinkedHashSet;
 import java.util.Set;
 
 import org.jboss.forge.project.dependencies.Dependency;
@@ -54,7 +55,7 @@ public class ApacheBeanValidationProvider implements ValidationProvider
                 .setArtifactId("org.apache.bval.bundle")
                 .setVersion("[0.1-incubating,)");
 
-        final Set<Dependency> tmpSet = new HashSet<Dependency>();
+        final Set<Dependency> tmpSet = new LinkedHashSet<Dependency>();
         tmpSet.add(apacheBeanValidation);
 
         this.dependencies = unmodifiableSet(tmpSet);
@@ -70,5 +71,11 @@ public class ApacheBeanValidationProvider implements ValidationProvider
     public Set<Dependency> getDependencies()
     {
         return dependencies;
+    }
+
+    @Override
+    public Set<Dependency> getAdditionalDependencies()
+    {
+        return Collections.emptySet();
     }
 }

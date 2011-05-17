@@ -21,7 +21,7 @@
  */
 package org.jboss.forge.validation.provider;
 
-import java.util.HashSet;
+import java.util.LinkedHashSet;
 import java.util.Set;
 
 import org.jboss.forge.project.dependencies.Dependency;
@@ -31,6 +31,7 @@ import org.jboss.shrinkwrap.descriptor.api.Descriptors;
 
 import static java.util.Collections.unmodifiableSet;
 import static org.jboss.forge.project.dependencies.ScopeType.PROVIDED;
+import static org.jboss.forge.project.dependencies.ScopeType.RUNTIME;
 
 /**
  * @author Kevin Pollet
@@ -39,6 +40,7 @@ public class HibernateValidatorProvider implements ValidationProvider
 {
     private final ValidationDescriptor defaultDescriptor;
     private final Set<Dependency> dependencies;
+    private final Set<Dependency> additionalDependencies;
 
     public HibernateValidatorProvider()
     {
@@ -56,10 +58,28 @@ public class HibernateValidatorProvider implements ValidationProvider
                 .setVersion("[4.1.0.Final,)")
                 .setScopeType(PROVIDED);
 
-        final Set<Dependency> tmpSet = new HashSet<Dependency>();
-        tmpSet.add(hibernateValidator);
+        final Set<Dependency> dependenciesTmpSet = new LinkedHashSet<Dependency>();
+        dependenciesTmpSet.add(hibernateValidator);
 
-        this.dependencies = unmodifiableSet(tmpSet);
+        this.dependencies = unmodifiableSet(dependenciesTmpSet);
+
+        // add hibernate validator additional dependencies
+        final DependencyBuilder seamValidationAPI = DependencyBuilder.create()
+                .setGroupId("org.jboss.seam.validation")
+                .setArtifactId("seam-validation-api")
+                .setVersion("[3.0.0.Final,)");
+
+        final DependencyBuilder seamValidationImpl = DependencyBuilder.create()
+                .setGroupId("org.jboss.seam.validation")
+                .setArtifactId("seam-validation-impl")
+                .setVersion("[3.0.0.Final,)")
+                .setScopeType(RUNTIME);
+
+        final Set<Dependency> additionalDependenciesTmpSet = new LinkedHashSet<Dependency>();
+        additionalDependenciesTmpSet.add(seamValidationAPI);
+        additionalDependenciesTmpSet.add(seamValidationImpl);
+
+        this.additionalDependencies = unmodifiableSet(additionalDependenciesTmpSet);
     }
 
     @Override
@@ -72,5 +92,11 @@ public class HibernateValidatorProvider implements ValidationProvider
     public Set<Dependency> getDependencies()
     {
         return dependencies;
+    }
+
+    @Override
+    public Set<Dependency> getAdditionalDependencies()
+    {
+        return additionalDependencies;
     }
 }

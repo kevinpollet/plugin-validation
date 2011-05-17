@@ -59,16 +59,16 @@ public class ValidationPlugin implements Plugin
     private final BeanManager beanManager;
     private final Event<InstallFacets> request;
     private final DependencyFacet dependencyFacet;
-    private final ShellPrompt shellPrompt;
+    private final ShellPrompt prompt;
 
     @Inject
-    public ValidationPlugin(Project project, Event<InstallFacets> request, BeanManager beanManager, ShellPrompt shellPrompt)
+    public ValidationPlugin(Project project, Event<InstallFacets> request, BeanManager beanManager, ShellPrompt prompt)
     {
         this.project = project;
         this.beanManager = beanManager;
         this.request = request;
         this.dependencyFacet = project.getFacet(DependencyFacet.class);
-        this.shellPrompt = shellPrompt;
+        this.prompt = prompt;
     }
 
     @Command(value = "setup", help = "Setup validation for this project")
@@ -81,7 +81,14 @@ public class ValidationPlugin implements Plugin
         final ValidationProvider validationProvider = provider.getValidationProvider(beanManager);
 
         installValidationFacet();
-        installValidationProviderDependencies(validationProvider.getDependencies());
+        installDependencies(validationProvider.getDependencies());
+
+        if (!validationProvider.getAdditionalDependencies().isEmpty())
+        {
+            if (prompt.promptBoolean("Would you install the validation provider additional dependencies?" ,false)){
+                installDependencies(validationProvider.getAdditionalDependencies());
+            }
+        }
 
         // generates the default provider validation configuration file
         final ValidationDescriptor providerDescriptor = validationProvider.getDefaultDescriptor();
@@ -102,13 +109,13 @@ public class ValidationPlugin implements Plugin
         }
     }
 
-    private void installValidationProviderDependencies(Set<Dependency> dependencies)
+    private void installDependencies(Set<Dependency> dependencies)
     {
         for (Dependency oneDependency : dependencies)
         {
             // let the user the choice of the version
             final List<Dependency> versions = dependencyFacet.resolveAvailableVersions(oneDependency);
-            final Dependency selected = shellPrompt.promptChoiceTyped("Which version of " + oneDependency.getArtifactId() + " would you like to use?", versions, versions.get(versions.size() - 1));
+            final Dependency selected = prompt.promptChoiceTyped("Which version of " + oneDependency.getArtifactId() + " would you like to use?", versions, versions.get(versions.size() - 1));
             if (!dependencyFacet.hasDependency(selected))
             {
                 dependencyFacet.addDependency(selected);

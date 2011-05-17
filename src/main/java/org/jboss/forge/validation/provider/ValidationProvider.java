@@ -34,4 +34,6 @@ public interface ValidationProvider
     ValidationDescriptor getDefaultDescriptor();
 
     Set<Dependency> getDependencies();
+
+    Set<Dependency> getAdditionalDependencies();
 }
