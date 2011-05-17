@@ -60,6 +60,7 @@ import org.jboss.forge.validation.api.ValidationFacet;
 import org.jboss.forge.validation.completer.PropertyCompleter;
 import org.jboss.forge.validation.util.JavaHelper;
 
+import static org.jboss.forge.shell.PromptType.JAVA_CLASS;
 import static org.jboss.forge.validation.util.ResourceHelper.getJavaClassFromResource;
 
 /**
@@ -96,6 +97,7 @@ public class PropertyConstraintPlugin implements Plugin
     public void addNullConstraint(@Option(name = "onProperty", completer = PropertyCompleter.class, required = true) String property,
                                   @Option(name = "onAccessor", flagOnly = true) boolean onAccessor,
                                   @Option(name = "message") String message,
+                                  @Option(name = "groups", type = JAVA_CLASS) String[] groups,
                                   PipeOut pipeOut) throws FileNotFoundException
     {
 
@@ -110,6 +112,7 @@ public class PropertyConstraintPlugin implements Plugin
     public void addNotNullConstraint(@Option(name = "onProperty", completer = PropertyCompleter.class, required = true) String property,
                                      @Option(name = "onAccessor", flagOnly = true) boolean onAccessor,
                                      @Option(name = "message") String message,
+                                     @Option(name = "groups", type = JAVA_CLASS) String[] groups,
                                      PipeOut pipeOut) throws FileNotFoundException
     {
 
@@ -124,6 +127,7 @@ public class PropertyConstraintPlugin implements Plugin
     public void addAssertTrueConstraint(@Option(name = "onProperty", completer = PropertyCompleter.class, required = true) String property,
                                         @Option(name = "onAccessor", flagOnly = true) boolean onAccessor,
                                         @Option(name = "message") String message,
+                                        @Option(name = "groups", type = JAVA_CLASS) String[] groups,
                                         PipeOut pipeOut) throws FileNotFoundException
     {
 
@@ -138,6 +142,7 @@ public class PropertyConstraintPlugin implements Plugin
     public void addAssertFalseConstraint(@Option(name = "onProperty", completer = PropertyCompleter.class, required = true) String property,
                                          @Option(name = "onAccessor", flagOnly = true) boolean onAccessor,
                                          @Option(name = "message") String message,
+                                         @Option(name = "groups", type = JAVA_CLASS) String[] groups,
                                          PipeOut pipeOut) throws FileNotFoundException
     {
 
@@ -153,6 +158,7 @@ public class PropertyConstraintPlugin implements Plugin
                                  @Option(name = "onAccessor", flagOnly = true) boolean onAccessor,
                                  @Option(name = "min", required = true) long min,
                                  @Option(name = "message") String message,
+                                 @Option(name = "groups", type = JAVA_CLASS) String[] groups,
                                  PipeOut pipeOut) throws FileNotFoundException
     {
 
@@ -169,6 +175,7 @@ public class PropertyConstraintPlugin implements Plugin
                                  @Option(name = "onAccessor", flagOnly = true) boolean onAccessor,
                                  @Option(name = "max", required = true) long max,
                                  @Option(name = "message") String message,
+                                 @Option(name = "groups", type = JAVA_CLASS) String[] groups,
                                  PipeOut pipeOut) throws FileNotFoundException
     {
 
@@ -186,6 +193,7 @@ public class PropertyConstraintPlugin implements Plugin
                                         @Option(name = "onAccessor", flagOnly = true) boolean onAccessor,
                                         @Option(name = "min", required = true) String min,
                                         @Option(name = "message") String message,
+                                        @Option(name = "groups", type = JAVA_CLASS) String[] groups,
                                         PipeOut pipeOut) throws FileNotFoundException
     {
 
@@ -202,6 +210,7 @@ public class PropertyConstraintPlugin implements Plugin
                                         @Option(name = "onAccessor", flagOnly = true) boolean onAccessor,
                                         @Option(name = "max", required = true) String max,
                                         @Option(name = "message") String message,
+                                        @Option(name = "groups", type = JAVA_CLASS) String[] groups,
                                         PipeOut pipeOut) throws FileNotFoundException
     {
 
@@ -219,6 +228,7 @@ public class PropertyConstraintPlugin implements Plugin
                                   @Option(name = "min") Integer min,
                                   @Option(name = "max") Integer max,
                                   @Option(name = "message") String message,
+                                  @Option(name = "groups", type = JAVA_CLASS) String[] groups,
                                   PipeOut pipeOut) throws FileNotFoundException
     {
 
@@ -245,6 +255,7 @@ public class PropertyConstraintPlugin implements Plugin
                                     @Option(name = "integer") int integer,
                                     @Option(name = "fraction") int fraction,
                                     @Option(name = "message") String message,
+                                    @Option(name = "groups", type = JAVA_CLASS) String[] groups,
                                     PipeOut pipeOut) throws FileNotFoundException
     {
 
@@ -261,6 +272,7 @@ public class PropertyConstraintPlugin implements Plugin
     public void addPastConstraint(@Option(name = "onProperty", completer = PropertyCompleter.class, required = true) String property,
                                   @Option(name = "onAccessor", flagOnly = true) boolean onAccessor,
                                   @Option(name = "message") String message,
+                                  @Option(name = "groups", type = JAVA_CLASS) String[] groups,
                                   PipeOut pipeOut) throws FileNotFoundException
     {
 
@@ -275,6 +287,7 @@ public class PropertyConstraintPlugin implements Plugin
     public void addFutureConstraint(@Option(name = "onProperty", completer = PropertyCompleter.class, required = true) String property,
                                     @Option(name = "onAccessor", flagOnly = true) boolean onAccessor,
                                     @Option(name = "message") String message,
+                                    @Option(name = "groups", type = JAVA_CLASS) String[] groups,
                                     PipeOut pipeOut) throws FileNotFoundException
     {
 
@@ -291,6 +304,7 @@ public class PropertyConstraintPlugin implements Plugin
                                      @Option(name = "regexp", required = true) String regexp,
                                      @Option(name = "flags") Pattern.Flag[] flags,
                                      @Option(name = "message") String message,
+                                     @Option(name = "groups", type = JAVA_CLASS) String[] groups,
                                      PipeOut pipeOut) throws FileNotFoundException
     {
 
