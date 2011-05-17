@@ -53,7 +53,7 @@ public class ScaffoldObserver
         {
             for (ScaffoldConfigurator oneConfigurator : configurators)
             {
-                oneConfigurator.addValidationConfiguration();
+                oneConfigurator.addValidationConfiguration(event);
             }
         }
     }

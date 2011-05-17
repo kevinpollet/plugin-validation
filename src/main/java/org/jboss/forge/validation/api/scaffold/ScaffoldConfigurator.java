@@ -21,10 +21,12 @@
  */
 package org.jboss.forge.validation.api.scaffold;
 
+import org.jboss.forge.scaffold.events.ScaffoldGeneratedResources;
+
 /**
  * @author Kevin Pollet
  */
 public interface ScaffoldConfigurator
 {
-    void addValidationConfiguration();
+    void addValidationConfiguration(ScaffoldGeneratedResources event);
 }

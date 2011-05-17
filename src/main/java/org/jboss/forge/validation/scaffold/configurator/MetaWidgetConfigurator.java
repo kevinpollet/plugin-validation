@@ -29,9 +29,11 @@ import org.jboss.forge.parser.xml.XMLParser;
 import org.jboss.forge.project.Project;
 import org.jboss.forge.project.facets.WebResourceFacet;
 import org.jboss.forge.resources.FileResource;
+import org.jboss.forge.scaffold.events.ScaffoldGeneratedResources;
 import org.jboss.forge.shell.ShellPrompt;
 import org.jboss.forge.validation.api.scaffold.ScaffoldConfigurator;
 import org.jboss.shrinkwrap.descriptor.spi.Node;
+import org.metawidget.forge.MetawidgetScaffold;
 
 /**
  * @author Kevin Pollet
@@ -49,41 +51,37 @@ public class MetawidgetConfigurator implements ScaffoldConfigurator
     }
 
     @Override
-    public void addValidationConfiguration()
+    public void addValidationConfiguration(ScaffoldGeneratedResources event)
     {
-        if (isMetawidgetScaffold())
+        if (event.getProvider() instanceof MetawidgetScaffold)
         {
             final FileResource<?> configFile = getMetawidgetConfigurationFile();
-            final Node root = XMLParser.parse(configFile.getResourceInputStream());
-
-            //TODO Remove when XMLParser bug is fixed
-            removeAllCommentNodes(root);
-
-            boolean choice;
-            final Node beanValidationInspector = root.getSingle("beanValidationInspector");
-            if (beanValidationInspector != null)
+            if (configFile.exists())
             {
-                choice = prompt.promptBoolean("MetaWidget scaffold detected would you like to add validation configuration?");
-            }
-            else
-            {
-                choice = prompt.promptBoolean("The validation configuration for Metawidget already exists, overwrite?");
-            }
+                final Node root = XMLParser.parse(configFile.getResourceInputStream());
+                removeAllCommentNodes(root); //TODO Remove when XMLParser bug is fixed
 
-            if (choice)
-            {
-                // if configuration already exists it is overwritten
-                addValidationConfigurationTo(root);
+                boolean choice;
+                final Node beanValidationInspector = root.getSingle("beanValidationInspector");
+                if (beanValidationInspector != null)
+                {
+                    choice = prompt.promptBoolean("MetaWidget scaffold detected would you like to add validation configuration?");
+                }
+                else
+                {
+                    choice = prompt.promptBoolean("The validation configuration for Metawidget already exists, overwrite?");
+                }
 
-                // saves metawidget configuration file
-                configFile.setContents(XMLParser.toXMLString(root));
+                if (choice)
+                {
+                    // if configuration already exists it is overwritten
+                    addValidationConfigurationTo(root);
+
+                    // saves metawidget configuration file
+                    configFile.setContents(XMLParser.toXMLString(root));
+                }
             }
         }
-    }
-
-    private boolean isMetawidgetScaffold()
-    {
-        return getMetawidgetConfigurationFile().exists();
     }
 
     private FileResource<?> getMetawidgetConfigurationFile()
