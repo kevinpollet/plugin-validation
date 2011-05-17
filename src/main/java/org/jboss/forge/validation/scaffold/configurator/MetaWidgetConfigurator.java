@@ -22,107 +22,107 @@
 package org.jboss.forge.validation.scaffold.configurator;
 
 import java.io.File;
-import java.io.IOException;
+import java.util.List;
 
-import javax.xml.parsers.DocumentBuilder;
-import javax.xml.parsers.DocumentBuilderFactory;
-import javax.xml.parsers.ParserConfigurationException;
-import javax.xml.transform.OutputKeys;
-import javax.xml.transform.Result;
-import javax.xml.transform.Source;
-import javax.xml.transform.Transformer;
-import javax.xml.transform.TransformerConfigurationException;
-import javax.xml.transform.TransformerException;
-import javax.xml.transform.TransformerFactory;
-import javax.xml.transform.dom.DOMSource;
-import javax.xml.transform.stream.StreamResult;
+import javax.inject.Inject;
 
+import org.jboss.forge.parser.xml.XMLParser;
 import org.jboss.forge.project.Project;
 import org.jboss.forge.project.facets.WebResourceFacet;
+import org.jboss.forge.resources.FileResource;
 import org.jboss.forge.shell.ShellPrompt;
 import org.jboss.forge.validation.api.scaffold.ScaffoldConfigurator;
-import org.w3c.dom.Document;
-import org.w3c.dom.Element;
-import org.w3c.dom.NodeList;
-import org.xml.sax.SAXException;
+import org.jboss.shrinkwrap.descriptor.spi.Node;
 
 /**
  * @author Kevin Pollet
  */
 public class MetawidgetConfigurator implements ScaffoldConfigurator
 {
-    @Override
-    public void addValidationConfiguration(Project project, ShellPrompt prompt)
+    private final Project project;
+    private final ShellPrompt prompt;
+
+    @Inject
+    public MetawidgetConfigurator(Project project, ShellPrompt prompt)
     {
-        if (isMetawidgetScaffold(project))
+        this.project = project;
+        this.prompt = prompt;
+    }
+
+    @Override
+    public void addValidationConfiguration()
+    {
+        if (isMetawidgetScaffold())
         {
-            if (prompt.promptBoolean("MetaWidget scaffold detected would you like to add validation configuration?"))
+            final FileResource<?> configFile = getMetawidgetConfigurationFile();
+            final Node root = XMLParser.parse(configFile.getResourceInputStream());
+
+            //TODO Remove when XMLParser bug is fixed
+            removeAllCommentNodes(root);
+
+            boolean choice;
+            final Node beanValidationInspector = root.getSingle("beanValidationInspector");
+            if (beanValidationInspector != null)
             {
-                try
-                {
-                    final File metawidgetConfigFile = getMetawidgetConfigurationFile(project);
-                    final DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
-                    final DocumentBuilder builder = factory.newDocumentBuilder();
-                    final Document document = builder.parse(metawidgetConfigFile);
+                choice = prompt.promptBoolean("MetaWidget scaffold detected would you like to add validation configuration?");
+            }
+            else
+            {
+                choice = prompt.promptBoolean("The validation configuration for Metawidget already exists, overwrite?");
+            }
 
-                    if (document.getElementsByTagName("beanValidationInspector").getLength() == 0)
-                    {
-                        final Element beanValidationInspector = document.createElement("beanValidationInspector");
-                        beanValidationInspector.setAttribute("xmlns", "java:org.metawidget.inspector.beanvalidation");
-                        beanValidationInspector.setAttribute("config", "org.metawidget.inspector.impl.BaseObjectInspectorConfig");
+            if (choice)
+            {
+                // if configuration already exists it is overwritten
+                addValidationConfigurationTo(root);
 
-                        final Element propertyStyle = document.createElement("propertyStyle");
-                        beanValidationInspector.appendChild(propertyStyle);
-
-                        final Element javaBeanPropertyStyle = document.createElement("javaBeanPropertyStyle");
-                        javaBeanPropertyStyle.setAttribute("xmlns", "java:org.metawidget.inspector.impl.propertystyle.javabean");
-                        javaBeanPropertyStyle.setAttribute("config", "JavaBeanPropertyStyleConfig");
-                        propertyStyle.appendChild(javaBeanPropertyStyle);
-
-                        final Element privateFieldConvention = document.createElement("privateFieldConvention");
-                        javaBeanPropertyStyle.appendChild(privateFieldConvention);
-
-                        final Element format = document.createElement("format");
-                        format.setTextContent("{0}");
-                        privateFieldConvention.appendChild(format);
-
-                        final NodeList nodeList = document.getElementsByTagName("array");
-                        nodeList.item(0).appendChild(beanValidationInspector);
-
-                        final Transformer transformer = TransformerFactory.newInstance().newTransformer();
-                        transformer.setOutputProperty(OutputKeys.INDENT, "yes");
-                        transformer.transform(new DOMSource(document), new StreamResult(metawidgetConfigFile));
-                    }
-
-                } catch (ParserConfigurationException e)
-                {
-                    throw new RuntimeException(e);
-                } catch (SAXException e)
-                {
-                    throw new RuntimeException(e);
-                } catch (IOException e)
-                {
-                    throw new RuntimeException(e);
-                } catch (TransformerConfigurationException e)
-                {
-                    throw new RuntimeException(e);
-                } catch (TransformerException e)
-                {
-                    throw new RuntimeException(e);
-                }
+                // saves metawidget configuration file
+                configFile.setContents(XMLParser.toXMLString(root));
             }
         }
     }
 
-    private boolean isMetawidgetScaffold(Project project)
+    private boolean isMetawidgetScaffold()
     {
-        final WebResourceFacet facet = project.getFacet(WebResourceFacet.class);
-        return facet.getWebResource("WEB-INF" + File.separator + "metawidget.xml").exists();
+        return getMetawidgetConfigurationFile().exists();
     }
 
-    private File getMetawidgetConfigurationFile(Project project)
+    private FileResource<?> getMetawidgetConfigurationFile()
     {
         final WebResourceFacet facet = project.getFacet(WebResourceFacet.class);
-        return facet.getWebResource("WEB-INF" + File.separator + "metawidget.xml").getUnderlyingResourceObject();
+        return facet.getWebResource("WEB-INF" + File.separator + "metawidget.xml");
+    }
+
+    private void addValidationConfigurationTo(Node rootNode)
+    {
+        rootNode.getOrCreate("htmlMetawidget")
+                    .attribute("xmlns", "java:org.metawidget.faces.component.html")
+                .getOrCreate("inspector")
+                .getOrCreate("compositeInspector")
+                    .attribute("xmlns", "java:org.metawidget.inspector.composite")
+                    .attribute("config", "CompositeInspectorConfig")
+                .getOrCreate("inspectors")
+                .getOrCreate("array")
+                    .text("")
+                .getOrCreate("beanValidationInspector")
+                    .attribute("xmlns", "java:org.metawidget.inspector.beanvalidation")
+                    .attribute("config", "org.metawidget.inspector.impl.BaseObjectInspectorConfig")
+                .getOrCreate("propertyStyle")
+                .getOrCreate("javaBeanPropertyStyle")
+                    .attribute("xmlns", "java:org.metawidget.inspector.impl.propertystyle.javabean")
+                    .attribute("config", "JavaBeanPropertyStyleConfig")
+                .getOrCreate("privateFieldConvention")
+               .getOrCreate("format")
+                    .text("{0}");
+    }
+
+    //TODO Remove when XMLParser bug is fixed
+    private void removeAllCommentNodes(Node node)
+    {
+        node.remove("#comment");
+        for (Node oneChildren : node.children())
+        {
+            removeAllCommentNodes(oneChildren);
+        }
     }
 }
