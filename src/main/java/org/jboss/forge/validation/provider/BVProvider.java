@@ -30,16 +30,21 @@ import static org.jboss.forge.shell.util.BeanManagerUtils.getContextualInstance;
  */
 public enum BVProvider
 {
-    HIBERNATE_VALIDATOR(HibernateValidatorProvider.class),
+    HIBERNATE_VALIDATOR("Hibernate Validator", HibernateValidatorProvider.class),
+    APACHE_BEAN_VALIDATION("Apache Bean Validation", ApacheBeanValidationProvider.class);
 
-    APACHE_BEAN_VALIDATION(ApacheBeanValidationProvider.class);
-
-
+    private final String name;
     private final Class<? extends ValidationProvider> validationProviderClass;
 
-    BVProvider(Class<? extends ValidationProvider> validationProviderClass)
+    BVProvider(String name, Class<? extends ValidationProvider> validationProviderClass)
     {
+        this.name = name;
         this.validationProviderClass = validationProviderClass;
+    }
+
+    public String getName()
+    {
+        return name;
     }
 
     public ValidationProvider getValidationProvider(BeanManager manager)
