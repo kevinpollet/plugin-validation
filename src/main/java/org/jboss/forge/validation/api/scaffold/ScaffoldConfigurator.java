@@ -21,13 +21,10 @@
  */
 package org.jboss.forge.validation.api.scaffold;
 
-import org.jboss.forge.project.Project;
-import org.jboss.forge.shell.ShellPrompt;
-
 /**
  * @author Kevin Pollet
  */
 public interface ScaffoldConfigurator
 {
-    void addValidationConfiguration(Project project, ShellPrompt prompt);
+    void addValidationConfiguration();
 }

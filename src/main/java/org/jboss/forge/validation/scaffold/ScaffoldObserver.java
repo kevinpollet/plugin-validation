@@ -33,22 +33,17 @@ import org.jboss.forge.validation.api.ValidationFacet;
 import org.jboss.forge.validation.api.scaffold.ScaffoldConfigurator;
 
 /**
- * This is an experimental way to listen scaffolding events and adds the
- * corresponding bean validation configuration.
- *
  * @author Kevin Pollet
  */
 public class ScaffoldObserver
 {
     private final Project project;
-    private final ShellPrompt prompt;
     private Instance<ScaffoldConfigurator> configurators;
 
     @Inject
-    public ScaffoldObserver(Project project, ShellPrompt prompt, @Any Instance<ScaffoldConfigurator> configurators)
+    public ScaffoldObserver(Project project, @Any Instance<ScaffoldConfigurator> configurators)
     {
         this.project = project;
-        this.prompt = prompt;
         this.configurators = configurators;
     }
 
@@ -59,7 +54,7 @@ public class ScaffoldObserver
         {
             for (ScaffoldConfigurator oneConfigurator : configurators)
             {
-                oneConfigurator.addValidationConfiguration(project, prompt);
+                oneConfigurator.addValidationConfiguration();
             }
         }
     }
