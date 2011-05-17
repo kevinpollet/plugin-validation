@@ -36,7 +36,6 @@ import org.jboss.forge.shell.events.InstallFacets;
 import org.jboss.forge.shell.plugins.Alias;
 import org.jboss.forge.shell.plugins.Command;
 import org.jboss.forge.shell.plugins.Option;
-import org.jboss.forge.shell.plugins.PipeOut;
 import org.jboss.forge.shell.plugins.Plugin;
 import org.jboss.forge.shell.plugins.RequiresFacet;
 import org.jboss.forge.shell.plugins.RequiresProject;
@@ -44,7 +43,9 @@ import org.jboss.forge.validation.api.ValidationDescriptor;
 import org.jboss.forge.validation.api.ValidationFacet;
 import org.jboss.forge.validation.provider.BVProvider;
 import org.jboss.forge.validation.provider.ValidationProvider;
-import org.jboss.shrinkwrap.descriptor.api.Descriptors;
+
+import static org.jboss.forge.shell.PromptType.JAVA_CLASS;
+import static org.jboss.shrinkwrap.descriptor.api.Descriptors.create;
 
 /**
  * @author Kevin Pollet
@@ -72,30 +73,25 @@ public class ValidationPlugin implements Plugin
 
     @Command(value = "setup", help = "Setup validation for this project")
     public void setup(@Option(name = "provider", defaultValue = "HIBERNATE_VALIDATOR", required = true) BVProvider provider,
-                      @Option(name = "messageInterpolator") String messageInterpolator,
-                      @Option(name = "traversableResolver") String traversableResolver,
-                      @Option(name = "constraintValidatorFactory") String constraintValidatorFactory,
-                      PipeOut pipeOut)
+                      @Option(name = "messageInterpolator", type = JAVA_CLASS) String messageInterpolator,
+                      @Option(name = "traversableResolver", type = JAVA_CLASS) String traversableResolver,
+                      @Option(name = "constraintValidatorFactory", type = JAVA_CLASS) String constraintValidatorFactory)
     {
-
+        // instantiates the validation provider specified by the user
         final ValidationProvider validationProvider = provider.getValidationProvider(beanManager);
 
         installValidationFacet();
         installValidationProviderDependencies(validationProvider.getDependencies());
 
-        // create validation descriptor if needed
-        if (shouldCreateDescriptor(messageInterpolator, traversableResolver, constraintValidatorFactory))
-        {
-            final ValidationDescriptor providerDescriptor = validationProvider.getDefaultDescriptor();
-            final ValidationDescriptor descriptor = Descriptors.create(ValidationDescriptor.class)
-                    .defaultProvider(providerDescriptor.getDefaultProvider())
-                    .messageInterpolator(messageInterpolator == null ? providerDescriptor.getMessageInterpolator() : messageInterpolator)
-                    .traversableResolver(traversableResolver == null ? providerDescriptor.getTraversableResolver() : traversableResolver)
-                    .constraintValidatorFactory(constraintValidatorFactory == null ? providerDescriptor.getConstraintValidatorFactory() : constraintValidatorFactory);
+        // generates the default provider validation configuration file
+        final ValidationDescriptor providerDescriptor = validationProvider.getDefaultDescriptor();
+        final ValidationDescriptor descriptor = create(ValidationDescriptor.class)
+                .defaultProvider(providerDescriptor.getDefaultProvider())
+                .messageInterpolator(messageInterpolator == null ? providerDescriptor.getMessageInterpolator() : messageInterpolator)
+                .traversableResolver(traversableResolver == null ? providerDescriptor.getTraversableResolver() : traversableResolver)
+                .constraintValidatorFactory(constraintValidatorFactory == null ? providerDescriptor.getConstraintValidatorFactory() : constraintValidatorFactory);
 
-            project.getFacet(ValidationFacet.class).saveConfig(descriptor);
-            pipeOut.println("validation descriptor has been created successfully.");
-        }
+        project.getFacet(ValidationFacet.class).saveConfig(descriptor);
     }
 
     private void installValidationFacet()
@@ -119,10 +115,5 @@ public class ValidationPlugin implements Plugin
                 dependencyFacet.addDependency(version);
             }
         }
-    }
-
-    private boolean shouldCreateDescriptor(String userMessageInterpolator, String userTraversableResolver, String userConstraintValidatorFactory)
-    {
-        return userMessageInterpolator != null || userTraversableResolver != null || userConstraintValidatorFactory != null;
     }
 }
