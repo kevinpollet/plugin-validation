@@ -59,11 +59,18 @@ public class MetawidgetConfigurator implements ScaffoldConfigurator
             if (configFile.exists())
             {
                 final Node root = XMLParser.parse(configFile.getResourceInputStream());
-                removeAllCommentNodes(root); //TODO Remove when XMLParser bug is fixed
+                final Node array = root.getOrCreate("htmlMetawidget")
+                        .attribute("xmlns", "java:org.metawidget.faces.component.html")
+                        .getOrCreate("inspector")
+                        .getOrCreate("compositeInspector")
+                        .attribute("xmlns", "java:org.metawidget.inspector.composite")
+                        .attribute("config", "CompositeInspectorConfig")
+                        .getOrCreate("inspectors")
+                        .getOrCreate("array");
 
                 boolean choice;
-                final Node beanValidationInspector = root.getSingle("beanValidationInspector");
-                if (beanValidationInspector != null)
+                final Node beanValidationInspector = array.getSingle("beanValidationInspector");
+                if (beanValidationInspector == null)
                 {
                     choice = prompt.promptBoolean("MetaWidget scaffold detected would you like to add validation configuration?");
                 }
@@ -75,9 +82,10 @@ public class MetawidgetConfigurator implements ScaffoldConfigurator
                 if (choice)
                 {
                     // if configuration already exists it is overwritten
-                    addValidationConfigurationTo(root);
+                    addValidationConfigurationTo(array);
 
                     // saves metawidget configuration file
+                    removeAllCommentNodes(root); //TODO Remove when XMLParser bug is fixed
                     configFile.setContents(XMLParser.toXMLString(root));
                 }
             }
@@ -90,18 +98,9 @@ public class MetawidgetConfigurator implements ScaffoldConfigurator
         return facet.getWebResource("WEB-INF" + File.separator + "metawidget.xml");
     }
 
-    private void addValidationConfigurationTo(Node rootNode)
+    private void addValidationConfigurationTo(Node node)
     {
-        rootNode.getOrCreate("htmlMetawidget")
-                .attribute("xmlns", "java:org.metawidget.faces.component.html")
-                .getOrCreate("inspector")
-                .getOrCreate("compositeInspector")
-                .attribute("xmlns", "java:org.metawidget.inspector.composite")
-                .attribute("config", "CompositeInspectorConfig")
-                .getOrCreate("inspectors")
-                .getOrCreate("array")
-                .text("")
-                .getOrCreate("beanValidationInspector")
+        node.getOrCreate("beanValidationInspector")
                 .attribute("xmlns", "java:org.metawidget.inspector.beanvalidation")
                 .attribute("config", "org.metawidget.inspector.impl.BaseObjectInspectorConfig")
                 .getOrCreate("propertyStyle")
