@@ -28,7 +28,6 @@ import javax.inject.Inject;
 
 import org.jboss.forge.project.Project;
 import org.jboss.forge.scaffold.events.ScaffoldGeneratedResources;
-import org.jboss.forge.shell.ShellPrompt;
 import org.jboss.forge.validation.api.ValidationFacet;
 import org.jboss.forge.validation.api.scaffold.ScaffoldConfigurator;
 

@@ -22,7 +22,6 @@
 package org.jboss.forge.validation.scaffold.configurator;
 
 import java.io.File;
-import java.util.List;
 
 import javax.inject.Inject;
 
@@ -96,24 +95,24 @@ public class MetawidgetConfigurator implements ScaffoldConfigurator
     private void addValidationConfigurationTo(Node rootNode)
     {
         rootNode.getOrCreate("htmlMetawidget")
-                    .attribute("xmlns", "java:org.metawidget.faces.component.html")
+                .attribute("xmlns", "java:org.metawidget.faces.component.html")
                 .getOrCreate("inspector")
                 .getOrCreate("compositeInspector")
-                    .attribute("xmlns", "java:org.metawidget.inspector.composite")
-                    .attribute("config", "CompositeInspectorConfig")
+                .attribute("xmlns", "java:org.metawidget.inspector.composite")
+                .attribute("config", "CompositeInspectorConfig")
                 .getOrCreate("inspectors")
                 .getOrCreate("array")
-                    .text("")
+                .text("")
                 .getOrCreate("beanValidationInspector")
-                    .attribute("xmlns", "java:org.metawidget.inspector.beanvalidation")
-                    .attribute("config", "org.metawidget.inspector.impl.BaseObjectInspectorConfig")
+                .attribute("xmlns", "java:org.metawidget.inspector.beanvalidation")
+                .attribute("config", "org.metawidget.inspector.impl.BaseObjectInspectorConfig")
                 .getOrCreate("propertyStyle")
                 .getOrCreate("javaBeanPropertyStyle")
-                    .attribute("xmlns", "java:org.metawidget.inspector.impl.propertystyle.javabean")
-                    .attribute("config", "JavaBeanPropertyStyleConfig")
+                .attribute("xmlns", "java:org.metawidget.inspector.impl.propertystyle.javabean")
+                .attribute("config", "JavaBeanPropertyStyleConfig")
                 .getOrCreate("privateFieldConvention")
-               .getOrCreate("format")
-                    .text("{0}");
+                .getOrCreate("format")
+                .text("{0}");
     }
 
     //TODO Remove when XMLParser bug is fixed
