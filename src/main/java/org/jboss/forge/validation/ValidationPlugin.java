@@ -85,7 +85,8 @@ public class ValidationPlugin implements Plugin
 
         if (!validationProvider.getAdditionalDependencies().isEmpty())
         {
-            if (prompt.promptBoolean("Would you install " + provider.getName() + " additional dependencies?" ,false)){
+            if (prompt.promptBoolean("Would you install " + provider.getName() + " additional dependencies?", false))
+            {
                 installDependencies(validationProvider.getAdditionalDependencies());
             }
         }
